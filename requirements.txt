@@ -3,5 +3,6 @@
 # Manually managing azure-functions-worker may cause unexpected issues
 
 azure-functions
+python-dotenv
 git+https://github.com/LongViewRE/LV_db_connection
 git+https://github.com/LongViewRE/LV_external_services

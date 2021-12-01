@@ -2,6 +2,7 @@ import datetime
 import logging
 
 import azure.functions as func
+
 from LV_external_services import ACClient
 
 
@@ -13,7 +14,7 @@ def main(mytimer: func.TimerRequest) -> None:
         logging.info('The timer is past due!')
 
     logging.info('Python timer trigger function ran at %s', utc_timestamp)
-    print("hello")
+    logging.info("hello")
     acc=ACClient()
-    print(acc.dealFields("Carpark"))
-    
+    logging.info(acc.dealFields("Carpark"))
+
