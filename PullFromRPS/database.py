@@ -1,3 +1,7 @@
+###############################################################################
+# database.py                                                                 #
+# Functions for retrieving data from Gerald                                   #
+###############################################################################
 import os
 
 from LV_db_connection import GremlinClient
@@ -13,11 +17,12 @@ def get_property_ids_gerald(gerald):
 
 def get_extended_property_info_gerald(gerald, prop_id):
     """
-    Returns a matching object to get_extended_property_info(), containing extended 
-    property information. Essentially used to compare the version just obtained from RPS 
-    to that which was already present in gerald.
+    Returns a matching object to get_extended_property_info(), containing
+    extended property information. Essentially used to compare the version
+    just obtained from RPS to that which was already present in gerald.
 
-    ASSUMPTIONS: properties have at most 1 landlord and at most 1 tenancy object.
+    ASSUMPTIONS: 
+    properties have at most 1 landlord and at most 1 tenancy object.
     """
     query = f"""g.V().hasLabel('property').has('id', eq('{prop_id}'))
                 .in('Owns','renting').hasLabel('landlord','tenant')

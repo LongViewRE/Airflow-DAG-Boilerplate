@@ -1,3 +1,8 @@
+###############################################################################
+# sync.py                                                                     #
+# Functions for comparing RPS and Gerald data and pushing/syncing any changes #
+# to Gerald                                                                   #
+###############################################################################
 import json
 import time
 import client
@@ -108,8 +113,8 @@ def compare_property(rps_property, gerald_property):
     """
     attributes = []
 
-    # Type is an attribute that may or may not come from RPS (alternatively comes from
-    # domain.com.au), and hence is only synced if non-empty. 
+    # Type is an attribute that may or may not come from RPS (alternatively 
+    # comes from domain.com.au), and hence is only synced if non-empty. 
     if rps_property['type'] != '':
         if gerald_property['type'] != rps_property['type']:
             attributes.append(f".property('type', '{rps_property['type']}')")
@@ -318,8 +323,8 @@ def partition(predicate, iterable):
 ###############################################################################
 def align_format_gerald(gerald_property):
     """
-    Removes some unnecessary fields from gerald property output (e.g ACC fields,
-    last updated, etc.)
+    Removes some unnecessary fields from gerald property output 
+    (e.g ACC fields, last updated, etc.)
     """
     gerald_property.pop('Last Updated', None)
     gerald_property.pop('acID', None)
@@ -371,19 +376,24 @@ def align_format_rps(rps_property):
     if len(rps_property['landlord']) == 0:
         rps_property['landlord'] = {}
     else:
-        rps_property['landlord']['id'] = "ll-"+rps_property['landlord'].pop('reapitID')
+        rps_property['landlord']['id'] = "ll-"+ \
+            rps_property['landlord'].pop('reapitID')
         rps_property['landlord']['system'] = "RPS"
         
-        rps_property['landlord']['contacts'] = list(map(align_contact_rps, rps_property['landlord']['contacts']))
+        rps_property['landlord']['contacts'] = list(map(align_contact_rps, 
+            rps_property['landlord']['contacts']))
 
     if len(rps_property['tenancy']) == 0:
         rps_property['tenancy'] = {}
     else:
-        rps_property['tenancy']['id'] = "tt-"+rps_property['tenancy'].pop('reapitID')
-        rps_property['tenancy']['periodic'] = "True" if rps_property['tenancy']['periodic'] else "False"
-        rps_property['tenancy']['endConfirmed'] = "True" if rps_property['tenancy']['endConfirmed'] else "False"
+        rps_property['tenancy']['id'] = "tt-"+ rps_property['tenancy'].pop('reapitID')
+        rps_property['tenancy']['periodic'] \
+            = "True" if rps_property['tenancy']['periodic'] else "False"
+        rps_property['tenancy']['endConfirmed'] \
+            = "True" if rps_property['tenancy']['endConfirmed'] else "False"
 
-        rps_property['tenancy']['contacts'] = list(map(align_contact_rps, rps_property['tenancy']['contacts']))
+        rps_property['tenancy']['contacts'] = list(map(align_contact_rps,
+            rps_property['tenancy']['contacts']))
     
     return rps_property
 

@@ -1,3 +1,7 @@
+###############################################################################
+# client.py                                                                   #
+# Functions for retrieving data from Reapit                                   #
+###############################################################################
 import os
 import logging
 
@@ -46,13 +50,15 @@ def get_amf(rps, prop_id):
             else:
                 continue
     except:
-        logging.error("Error processing AMF for property: " + prop_id, exc_info=True)
+        logging.error("Error processing AMF for property: " + prop_id,
+            exc_info=True)
 
     return amf
 
 def get_landlord(rps, prop_id):
     """
-    Returns the landlord and contact info for a property (ID is already in property object).
+    Returns the landlord and contact info for a property (ID is already in 
+    property object).
 
     Return format (assuming response is not empty):
         {
@@ -167,8 +173,15 @@ def get_extended_property_info_rps(rps, prop):
         prop['amf'] = get_amf(rps, prop['ID'])
         prop['landlord'] = get_landlord(rps, prop['ID'])
         prop['tenancy'] = {}
-        if (prop['InternalLettingStatus'] != 'Tenancy Current - Available') and (prop['InternalLettingStatus'] != 'Arranging Tenancy - Available') and (prop['InternalLettingStatus'] != 'To Let - Available') and (prop['InternalLettingStatus'] != 'Tenancy Finished') and (prop['InternalLettingStatus'] != 'Arranging Tenancy - Unavailable'):
+
+        if (prop['InternalLettingStatus'] != 'Tenancy Current - Available') \
+            and (prop['InternalLettingStatus'] != 'Arranging Tenancy - Available') \
+            and (prop['InternalLettingStatus'] != 'To Let - Available') \
+            and (prop['InternalLettingStatus'] != 'Tenancy Finished') \
+            and (prop['InternalLettingStatus'] != 'Arranging Tenancy - Unavailable'):
+            
             prop['tenancy'] = get_tenancy(rps, prop['ID'])
+
     except Exception as e:
         logging.error("Error processing property: " + str(prop['ID']), exc_info=True)
     
