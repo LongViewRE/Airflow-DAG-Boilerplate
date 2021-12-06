@@ -4,7 +4,7 @@ import logging
 from dotenv import load_dotenv
 from LV_external_services import RPSClient
 
-def get_properties(rps):
+def get_properties_rps(rps):
     """
     Returns a list of all RPS properties.
     """
@@ -158,9 +158,9 @@ def get_contact(rps, contact_id):
     
     return contact
 
-def get_all_property_info(rps, prop):
+def get_extended_property_info_rps(rps, prop):
     """
-    Returns all property information for the given property, including
+    Returns extended property information for the given property, including
     landlords, tenants and management fee.
     """
     try:
@@ -173,6 +173,21 @@ def get_all_property_info(rps, prop):
         logging.error("Error processing property: " + str(prop['ID']), exc_info=True)
     
     return prop
+
+def get_all_properties_rps(rps):
+    """
+    Returns all information from RPS to sync.
+    Result is a list of extended property objects, which include the property's
+    landlord + contacts, and tenancy + contacts. 
+    """
+    props = get_properties_rps(rps)
+    extended_properties = []
+
+    for prop in props:
+        extended_property = get_extended_property_info_rps(rps, prop)
+        extended_properties.append(extended_property)
+    
+    return extended_properties
 
 if __name__ == "__main__":
     load_dotenv()
