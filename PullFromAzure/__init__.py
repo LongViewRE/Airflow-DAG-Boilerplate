@@ -52,7 +52,7 @@ def format_queries(employees, gerald):
         #call to gerald 
         #if employee is not in gerald
         if len(call) == 0:
-            new = f"g.addV('emp-{e['id']}').property('firstName', '{e['givenName']}').property('lastName', '{e['surname']}').property('email', '{e['mail']}').property('active', '{e['active']}').property('mobile', '{e['mobilePhone']}')"
+            new = f"g.addV('employee').property('id', 'emp-{e['id']}').property('firstName', '{e['givenName']}').property('lastName', '{e['surname']}').property('email', '{e['mail']}').property('active', '{e['active']}').property('mobile', '{e['mobilePhone']}').property('system', 'Azure')"
             empV.append(new)
         else:
             new = f"g.V('emp-{e['id']}').property('firstName', '{e['givenName']}').property('lastName', '{e['surname']}').property('email', '{e['mail']}').property('active', '{e['active' ]}').property('mobile', '{e['mobilePhone']}')"
@@ -63,12 +63,19 @@ def format_queries(employees, gerald):
 def main():
 
     load_dotenv()
-    #try
-    Gerald = GremlinClient(os.environ['gu'], os.environ['gp'])
-    AzureAD = MSGraphClient(os.environ["gru"], os.environ["grs"])
-    emp = get_employees(AzureAD)
-    queries = format_queries(emp, Gerald)
+    try:
+        Gerald = GremlinClient(os.environ['gu'], os.environ['gp'])
+        AzureAD = MSGraphClient(os.environ["gru"], os.environ["grs"])
+        emp = get_employees(AzureAD)
+        queries = format_queries(emp, Gerald)
+    except:
+        logging.error("An error has occurred with functions")
 
     for query in queries:
-        #try
-        Gerald.submit(query)
+        try:
+            Gerald.submit(query)
+            logging.info("%s query has been executed successfully", query)
+        except:
+            logging.error("Error occured when submitting query to Gerald", exc_info=True)
+
+
