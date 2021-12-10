@@ -132,6 +132,7 @@ def get_contact(rps, contact_id):
             "type": company or contact,
             "Company name": company name (only if type = company)
         }
+    Note: some fields may be missing
     """
     path = f'contacts/{contact_id}?IncludeArchive=True'
     response = rps.call(path,'get')
