@@ -3,6 +3,7 @@
 # Functions for retrieving data from Gerald                                   #
 ###############################################################################
 import os
+import logging
 
 from LV_db_connection import GremlinClient
 from dotenv import load_dotenv
@@ -86,7 +87,22 @@ def get_all_properties_gerald(gerald):
     
     return extended_properties
 
-
+def submit_all(gerald, queries):
+    """
+    Submits all queries to gerald.
+    """
+    for query in queries['vertices']:
+        try:
+            gerald.submit(query)
+        except Exception as e:
+            logging.error(f"Error processing query: {query}", exc_info=True)
+    
+    for query in queries['edges']:
+        try:
+            gerald.submit(query)
+        except Exception as e:
+            logging.error(f"Error processing query: {query}", exc_info=True)
+    
 if __name__ == "__main__":
     load_dotenv()
     gerald = GremlinClient(os.environ['GERALD_USERNAME'], os.environ['GERALD_PWD'])

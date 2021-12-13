@@ -4,5 +4,6 @@
 
 azure-functions
 python-dotenv
+thefuzz[speedup]
 git+https://github.com/LongViewRE/LV_db_connection
 git+https://github.com/LongViewRE/LV_external_services
