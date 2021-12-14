@@ -203,7 +203,3 @@ def get_all_properties_rps(rps):
     
     return extended_properties
 
-if __name__ == "__main__":
-    load_dotenv()
-    rps = RPSClient(os.environ['rpskey'])
-    print(get_landlord(rps, 'rps_lng-HDO120385'))

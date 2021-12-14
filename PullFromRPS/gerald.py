@@ -3,8 +3,9 @@
 # Functions for pushing data to Gerald                                        #
 ###############################################################################
 import time
+import logging
 
-from functools import partial, reduce
+from functools import reduce
 from copy import deepcopy
 
 from utils import flatten
@@ -32,6 +33,7 @@ def add_item(gerald, rps_prop):
         queries.append(add_tenancy(gerald, rps_tenancy, prop_id))
     
     queries = reduce(flatten, queries, {"vertices": [], "edges": []})
+    queries["id"] = prop_id
     return queries
 
 def add_property(gerald, prop):
@@ -91,7 +93,7 @@ def add_landlord(gerald, ll, prop_id):
     queries.append({"vertices": [vquery], "edges": [equery]})
 
     # Get all the vertices/edges for the contacts
-    queries += list(map(partial(add_contact, gerald, ll_id), contacts))
+    queries += [add_contact(gerald, ll_id, c) for c in contacts]
 
     queries = reduce(flatten, queries, {"vertices": [], "edges": []})
     return queries
@@ -127,7 +129,7 @@ def add_tenancy(gerald, ten, prop_id):
     queries.append({"vertices": [vquery], "edges": [equery]})
 
     # Get all the vertices/edges for the contacts
-    queries += list(map(partial(add_contact, gerald, tt_id), contacts))
+    queries += [add_contact(gerald, tt_id, c) for c in contacts]
     
     queries = reduce(flatten, queries, {"vertices": [], "edges": []})
     return queries
@@ -266,7 +268,7 @@ def archive_item(rps_prop):
     query = (   f"g.V('{rps_prop['id']}')"
                 f".property('status','not under management')"
                 f".property('Last Updated', {int(time.time())})")
-    return {"vertices": [query], "edges": []}
+    return {"id": rps_prop['id'], "vertices": [query], "edges": []}
 
 def replace_edge(parent_id, old_label, new_label, node):
     """
@@ -281,3 +283,22 @@ def replace_edge(parent_id, old_label, new_label, node):
                 f".property('Last Updated', {int(time.time())})"
                 f".select('e1').drop()")
     return {"vertices": [], "edges": [equery]} 
+
+###############################################################################
+# MISC FUNCTIONS                                                              #
+###############################################################################
+def submit_all(gerald, queries):
+    """
+    Submits all queries to gerald.
+    """
+    for query in queries['vertices']:
+        try:
+            gerald.submit(query)
+        except Exception as e:
+            logging.error(f"Error submitting query: {query}", exc_info=True)
+    
+    for query in queries['edges']:
+        try:
+            gerald.submit(query)
+        except Exception as e:
+            logging.error(f"Error submitting query: {query}", exc_info=True)

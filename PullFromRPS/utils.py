@@ -3,22 +3,25 @@
 # Utility functions, including helpers and formatting                         #
 ###############################################################################
 import random
-import client
-import database
+import logging
 
 from thefuzz import fuzz
+
+from client import get_all_properties_rps
 
 ###############################################################################
 # HELPER FUNCTIONS                                                            #
 ###############################################################################
-def retrieve_properties(rps, gerald):
+def retrieve_properties(rps, property_client):
     """
     Retrieves a list of all property info from RPS and Gerald
     """
-    rps_props = client.get_all_properties_rps(rps)
-    rps_props = list(map(align_format_rps, rps_props))
-    gerald_props = database.get_all_properties_gerald(gerald)
-    gerald_props = list(map(align_format_gerald, gerald_props))
+    rps_props = get_all_properties_rps(rps)
+    rps_props = [align_format_rps(p) for p in rps_props]
+    logging.info("Pulled properties from RPS")
+    gerald_props = property_client.get_all_managed_properties()
+    gerald_props = [align_format_gerald(p) for p in gerald_props]
+    logging.info("Pulled properties from Gerald")
 
     return rps_props, gerald_props
 
@@ -114,13 +117,13 @@ def align_format_gerald(gerald_property):
     gerald_property.pop('last appraisal date', None)
     
     if len(gerald_property['landlord']) > 0:
-        gerald_property['landlord']['contacts'] = list(map(align_contact_gerald,
-            gerald_property['landlord']['contacts']))
+        gerald_property['landlord']['contacts'] = \
+            [align_contact_gerald(c) for c in gerald_property['landlord']['contacts']]
     
     if len(gerald_property['tenancy']) > 0:
         gerald_property['tenancy'].pop('Last Updated', None)
-        gerald_property['tenancy']['contacts'] = list(map(align_contact_gerald,
-            gerald_property['tenancy']['contacts']))
+        gerald_property['tenancy']['contacts'] = \
+            [align_contact_gerald(c) for c in gerald_property['tenancy']['contacts']]
 
     return gerald_property
 
@@ -162,8 +165,8 @@ def align_format_rps(rps_property):
             rps_property['landlord'].pop('reapitID')
         rps_property['landlord']['system'] = "RPS"
         
-        rps_property['landlord']['contacts'] = list(map(align_contact_rps, 
-            rps_property['landlord']['contacts']))
+        rps_property['landlord']['contacts'] = \
+            [align_contact_rps(c) for c in rps_property['landlord']['contacts']]
 
     if len(rps_property['tenancy']) == 0:
         rps_property['tenancy'] = {}
@@ -174,8 +177,8 @@ def align_format_rps(rps_property):
         rps_property['tenancy']['endConfirmed'] \
             = "True" if rps_property['tenancy']['endConfirmed'] else "False"
 
-        rps_property['tenancy']['contacts'] = list(map(align_contact_rps,
-            rps_property['tenancy']['contacts']))
+        rps_property['tenancy']['contacts'] = \
+            [align_contact_rps(c) for c in rps_property['tenancy']['contacts']]
     
     return rps_property
 

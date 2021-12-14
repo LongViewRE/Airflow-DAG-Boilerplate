@@ -5,41 +5,42 @@
 ###############################################################################
 import os
 import json
-
+import logging
+import datetime as dt
 
 from copy import deepcopy
 from dotenv import load_dotenv
-from functools import partial, reduce
+from functools import reduce
 from itertools import product
-from operator import itemgetter
 
 from LV_db_connection import GremlinClient
 from LV_external_services import RPSClient
+from LV_general_functions import PropertiesClient
 
 from utils import partition, retrieve_properties, flatten, contact_comparison, \
-                    align_format_gerald, align_format_rps, diff
-from database import submit_all
+                align_format_gerald, align_format_rps, diff
+from gerald import add_item, archive_item, add_contact, replace_edge, \
+                    add_landlord, add_property, add_tenancy, submit_all
 
 ###############################################################################
 # SYNC LOGIC                                                                  #
 ###############################################################################
 
-def sync(rps, gerald):
+def sync(rps, gerald, property_client):
     """
     Main function that syncs RPS and Gerald.
     """
     queries = []
-    rps_props, gerald_props = retrieve_properties(rps, gerald)
+    rps_props, gerald_props = retrieve_properties(rps, property_client)
     to_add, to_archive, to_compare = sync_partition(rps_props, gerald_props)
 
-    queries += list(map(partial(add_item, gerald), to_add))
-    queries += list(map(archive_item, to_archive))
-    queries += list(map(partial(compare_item, gerald), to_compare))
+    queries += [add_item(gerald, p) for p in to_add]
+    queries += [archive_item(p) for p in to_archive]
+    queries += [compare_item(gerald, p) for p in to_compare]
 
-    queries = reduce(flatten, queries, {"vertices": [], "edges": []})
-    return queries
-    #submit_all(gerald, queries)
-
+    logging.info("Constructed all queries")
+    submit_all(gerald, queries)
+    logging.info("Submitted all queries")
 
 def sync_partition(rps_props, gerald_props):
     """
@@ -50,9 +51,8 @@ def sync_partition(rps_props, gerald_props):
     to_compare: list of 2-tuples (rps, gerald) which
                 must be compared and synced if necessary
     """
-    get_id = lambda p: p['id']
-    rps_ids = list(map(get_id, rps_props))
-    gerald_ids = list(map(get_id, gerald_props))
+    rps_ids = [p['id'] for p in rps_props]
+    gerald_ids = [p['id'] for p in gerald_props]
 
     # partitions the RPS items - if the ID is in the gerald list,
     # we must compare them further to check for changes. If not, it is a new
@@ -66,6 +66,7 @@ def sync_partition(rps_props, gerald_props):
                                                 gerald_props)
 
     # sort the items to compare such that they align
+    get_id = lambda p: p['id']
     to_compare_gerald.sort(key=get_id)
     to_compare_rps.sort(key=get_id)
 
@@ -101,6 +102,7 @@ def compare_item(gerald, tuple):
     queries.append(compare_tenancy(gerald, rps_tenancy, gerald_tenancy, prop_id))
 
     queries = reduce(flatten, queries, {"vertices": [], "edges": []})
+    queries['id'] = prop_id
     return queries
     
 def compare_property(gerald, rps_prop, gerald_prop):
@@ -171,16 +173,16 @@ def compare_landlord(gerald, rps_ll, gerald_ll, prop_id):
 
         # partition the rps and gerald contacts
         pairs = product(rps_cons, gerald_cons)
-        to_compare = list(filter(contact_comparison, pairs))
-        to_add = diff(rps_cons, list(map(itemgetter(0), to_compare)))
-        to_archive = diff(gerald_cons, list(map(itemgetter(1), to_compare)))
+        to_compare = [c for c in pairs if contact_comparison(c)]
+        to_add = diff(rps_cons, [c[0] for c in to_compare])
+        to_archive = diff(gerald_cons, [c[1] for c in to_compare])
 
         # Contacts to add to landlord
-        queries += list(map(partial(add_contact, gerald, ll_id), to_add))
+        queries += [add_contact(gerald, ll_id, c) for c in to_add]
         # Contacts to remove to landlord
-        queries += list(map(partial(replace_edge, ll_id, "is a", "was a"), to_archive))
+        queries += [replace_edge(ll_id, "is a", "was a", c) for c in to_archive]
         # Contacts to compare
-        queries += list(map(partial(compare_contact, gerald, ll_id), to_compare))
+        queries += [compare_contact(gerald, ll_id, c) for c in to_compare]
 
     queries = reduce(flatten, queries, {"vertices": [], "edges": []})
     return queries
@@ -218,16 +220,16 @@ def compare_tenancy(gerald, rps_ten, gerald_ten, prop_id):
 
         # partition the rps and gerald contacts
         pairs = product(rps_cons, gerald_cons)
-        to_compare = list(filter(contact_comparison, pairs))
-        to_add = diff(rps_cons, list(map(itemgetter(0), to_compare)))
-        to_archive = diff(gerald_cons, list(map(itemgetter(1), to_compare)))
+        to_compare = [c for c in pairs if contact_comparison(c)]
+        to_add = diff(rps_cons, [c[0] for c in to_compare])
+        to_archive = diff(gerald_cons, [c[1] for c in to_compare])
 
         # Contacts to add to tenancy
-        queries += list(map(partial(add_contact, gerald, tt_id), to_add))
-        # Contacts to remove from tenancy
-        queries += list(map(partial(replace_edge, tt_id, "is a", "was a"), to_archive))
+        queries += [add_contact(gerald, tt_id, c) for c in to_add]
+        # Contacts to remove to tenancy
+        queries += [replace_edge(tt_id, "is a", "was a", c) for c in to_archive]
         # Contacts to compare
-        queries += list(map(partial(compare_contact, gerald, tt_id), to_compare))
+        queries += [compare_contact(gerald, tt_id, c) for c in to_compare]
 
         # TENANCY ATTRIBUTES PROCESSING
         # Check if any differences exist
@@ -271,24 +273,86 @@ def compare_contact(gerald, parent_id, tuple):
     return queries
 
 
+###############################################################################
+# TESTING                                                                     #
+###############################################################################
+def test(rps, gerald):
+    with open('queries/gerald.json') as f:
+        gerald_props = json.load(f)
+        gerald_props = [align_format_gerald(p) for p in gerald_props]
+
+    with open('queries/rps.json') as f:
+        rps_props = json.load(f)
+        rps_props = list(rps_props.values())
+        rps_props = [align_format_rps(p) for p in rps_props]
+
+    to_add, to_archive, to_compare = sync_partition(rps_props, gerald_props)
+    queries = []
+
+    queries += [add_item(gerald, p) for p in to_add]
+    queries += [archive_item(p) for p in to_archive]
+    queries += [compare_item(gerald, p) for p in to_compare]
+
+    logging.info("Constructed all queries")
+    with open('queries/to_add_old.json', 'w') as f:
+        json.dump(to_add, f, indent=4)
+    with open('queries/to_archive_old.json', 'w') as f:
+        json.dump(to_archive, f, indent=4)
+    with open('queries/to_compare_old.json', 'w') as f:
+        json.dump(to_compare, f, indent=4)
+    with open('queries/queries_old.json', 'w') as f:
+        json.dump(queries, f, indent=4)
+
+def sync_test(rps, gerald, property_client):
+    queries = []
+    rps_props, gerald_props = retrieve_properties(rps, property_client)
+    to_add, to_archive, to_compare = sync_partition(rps_props, gerald_props)
+
+    queries += [add_item(gerald, p) for p in to_add]
+    queries += [archive_item(p) for p in to_archive]
+    queries += [compare_item(gerald, p) for p in to_compare]
+
+    logging.info("Constructed all queries")
+    with open('queries/to_add.json', 'w') as f:
+        json.dump(to_add, f, indent=4)
+    with open('queries/to_archive.json', 'w') as f:
+        json.dump(to_archive, f, indent=4)
+    with open('queries/to_compare.json', 'w') as f:
+        json.dump(to_compare, f, indent=4)
+    with open('queries/queries.json', 'w') as f:
+        json.dump(queries, f, indent=4)
+
+    for query in queries:
+        try:
+            #submit_all(gerald, query['vertices'])
+            #submit_all(gerald, query['edges'])
+            logging.info(f"Submitted queries for property {query['id']}")
+        except Exception as e:
+            logging.error(f"Error submitting queries for {query['id']}", exc_info=True)
+            with open("logs/errors.log", "a") as f:
+                json.dump(query, f, indent=4)
+
+    logging.info("Submitted all queries")
+
+###############################################################################
+# MAIN FUNCTION                                                               #
+###############################################################################
+
 if __name__ == "__main__":
     load_dotenv()
     rps = RPSClient(os.environ['rpskey'])
     gerald = GremlinClient(os.environ['GERALD_USERNAME'], os.environ['GERALD_PWD'])
-    #rps_props, gerald_props = sync(rps, gerald)
-    #gerald_props = get_all_properties_gerald(gerald)
-    #with open('rps.json', 'w') as f:
-    #    json.dump(rps_props, f, indent=4)
+    property_client = PropertiesClient(os.environ['GERALD_USERNAME'], os.environ['GERALD_PWD'])
+   
+    date = dt.date.today()
+    logfile = f'logs/{date.year}-{date.month}.log'
+    logging.basicConfig(filename=logfile, level=logging.INFO, 
+                format="%(asctime)s - %(message)s", datefmt='%d-%b-%y %H:%M:%S')
     
-    #with open('gerald.json', 'w') as f:
-    #    json.dump(gerald_props, f, indent=4)
-    with open('gerald.json') as f:
-        gerald_props = json.load(f)
-        gerald_props = list(map(align_format_gerald, gerald_props))
+    #sync(rps, gerald, property_client)
+    #test(rps, gerald)
+    sync_test(rps, gerald, property_client)
 
-    with open('rps.json') as f:
-        rps_props = json.load(f)
-        rps_props = list(rps_props.values())
-        rps_props = list(map(align_format_rps, rps_props))
 
-    to_add, to_archive, to_compare = sync_partition(rps_props, gerald_props)
+
+
