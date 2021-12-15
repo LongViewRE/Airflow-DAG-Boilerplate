@@ -251,8 +251,8 @@ def add_company_contacts(gerald, company):
         c = gerald.parse_graph_json(item)
         equery = (  f"g.V('{c['id']}')"
                 f".coalesce("
-                f"__.outE('is a').to(g.V('{cmp_id}')),"
-                f"__.addE('is a').to(g.V('{cmp_id}')))")
+                f"__.outE('is part of').to(g.V('{cmp_id}')),"
+                f"__.addE('is part of').to(g.V('{cmp_id}')))")
         equeries.append(equery)
     
     return {"vertices": [], "edges": equeries}
