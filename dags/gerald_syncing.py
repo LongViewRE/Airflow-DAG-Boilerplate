@@ -9,7 +9,7 @@ def gerald_syncing():
     """
     This DAG handles syncing data to Gerald.
     """
-    """
+    
     @task.virtualenv(
         use_dill=False,
         system_site_packages=True,
@@ -18,7 +18,6 @@ def gerald_syncing():
                         'git+ssh://git@github.com/LongViewRE/LV_external_services',
                         'git+ssh://git@github.com/LongViewRE/LV_general_functions'],
     )
-    """
     def pull_from_RPS():
         # Import the current and parent directory into sys.path such that our custom
         # imports work with the virtualenv (hacky but only solution I found)
@@ -51,14 +50,6 @@ def gerald_syncing():
             logging.error("Exception contact", exc_info=True)
 
 
-    t1 = PythonVirtualenvOperator(
-        use_dill=False,
-        system_site_packages=True,
-        requirements=['thefuzz[speedup]', 'python-dotenv', 
-                        'git+ssh://git@github.com/LongViewRE/LV_db_connection',
-                        'git+ssh://git@github.com/LongViewRE/LV_external_services',
-                        'git+ssh://git@github.com/LongViewRE/LV_general_functions'],
-        python_callable=pull_from_RPS
-    )
+    pull_from_RPS()
 
 gerald_syncing = gerald_syncing()
