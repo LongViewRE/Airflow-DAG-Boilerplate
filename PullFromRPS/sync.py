@@ -26,6 +26,19 @@ import add_item, archive_item, add_contact, replace_edge, add_landlord, \
     add_property, add_tenancy, submit_all
 
 ###############################################################################
+# MAIN FUNCTION                                                               #
+###############################################################################
+
+def main(rps_key, gerald_username, gerald_password):
+    # Initialise clients
+    rps = RPSClient(rps_key)
+    gerald = GremlinClient(gerald_username, gerald_password)
+    property_client = PropertiesClient(gerald_username, gerald_password)
+
+    
+    sync(rps, gerald, property_client)
+
+###############################################################################
 # SYNC LOGIC                                                                  #
 ###############################################################################
 
@@ -42,7 +55,17 @@ def sync(rps, gerald, property_client):
     queries += [compare_item(gerald, p) for p in to_compare]
 
     logging.info("Constructed all queries")
-    submit_all(gerald, queries)
+
+    for query in queries:
+        try:
+            submit_all(gerald, query['vertices'])
+            submit_all(gerald, query['edges'])
+            logging.info(f"Submitted queries for property {query['id']}")
+        except Exception as e:
+            logging.error(f"Error submitting queries for {query['id']}", exc_info=True)
+            with open("logs/errors.log", "a") as f:
+                json.dump(query, f, indent=4)
+
     logging.info("Submitted all queries")
 
 def sync_partition(rps_props, gerald_props):
@@ -337,24 +360,8 @@ def sync_test(rps, gerald, property_client):
 
     logging.info("Submitted all queries")
 
-###############################################################################
-# MAIN FUNCTION                                                               #
-###############################################################################
 
-if __name__ == "__main__":
-    load_dotenv()
-    rps = RPSClient(os.environ['rpskey'])
-    gerald = GremlinClient(os.environ['GERALD_USERNAME'], os.environ['GERALD_PWD'])
-    property_client = PropertiesClient(os.environ['GERALD_USERNAME'], os.environ['GERALD_PWD'])
-   
-    date = dt.date.today()
-    logfile = f'logs/{date.year}-{date.month}.log'
-    logging.basicConfig(filename=logfile, level=logging.INFO, 
-                format="%(asctime)s - %(message)s", datefmt='%d-%b-%y %H:%M:%S')
-    
-    #sync(rps, gerald, property_client)
-    test(rps, gerald)
-    #sync_test(rps, gerald, property_client)
+
 
 
 
