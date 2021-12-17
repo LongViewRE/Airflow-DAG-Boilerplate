@@ -7,7 +7,7 @@ import logging
 
 from thefuzz import fuzz
 
-from client import get_all_properties_rps
+from gerald_syncing.PullFromRPS.client import get_all_properties_rps
 
 ###############################################################################
 # HELPER FUNCTIONS                                                            #

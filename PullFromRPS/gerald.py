@@ -8,7 +8,7 @@ import logging
 from functools import reduce
 from copy import deepcopy
 
-from utils import flatten
+from gerald_syncing.PullFromRPS.utils import flatten
 
 ###############################################################################
 # VERTEX/EDGE CREATION FUNCTIONS                                              #

@@ -17,10 +17,13 @@ from LV_db_connection import GremlinClient
 from LV_external_services import RPSClient
 from LV_general_functions import PropertiesClient
 
-from utils import partition, retrieve_properties, flatten, contact_comparison, \
-                align_format_gerald, align_format_rps, diff
-from gerald import add_item, archive_item, add_contact, replace_edge, \
-                    add_landlord, add_property, add_tenancy, submit_all
+from gerald_syncing.PullFromRPS.utils \
+import partition, retrieve_properties, flatten, contact_comparison, \
+    align_format_gerald, align_format_rps, diff
+
+from gerald_syncing.PullFromRPS.gerald \
+import add_item, archive_item, add_contact, replace_edge, add_landlord, \
+    add_property, add_tenancy, submit_all
 
 ###############################################################################
 # SYNC LOGIC                                                                  #
@@ -350,8 +353,8 @@ if __name__ == "__main__":
                 format="%(asctime)s - %(message)s", datefmt='%d-%b-%y %H:%M:%S')
     
     #sync(rps, gerald, property_client)
-    #test(rps, gerald)
-    sync_test(rps, gerald, property_client)
+    test(rps, gerald)
+    #sync_test(rps, gerald, property_client)
 
 
 
