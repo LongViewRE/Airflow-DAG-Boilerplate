@@ -19,11 +19,9 @@ def gerald_syncing():
                         'git+ssh://git@github.com/LongViewRE/LV_general_functions'],
     )
     def pull_from_RPS():
-        # Import the current and parent directory into sys.path such that our custom
-        # imports work with the virtualenv (hacky but only solution I found)
-        import sys, os, inspect
-        currentdir = os.path.dirname(os.path.abspath(inspect.getfile(inspect.currentframe())))
-        sys.path.insert(0, currentdir)
+        # extremely hacky way to add packages to the python path, should be changed in future
+        import sys
+        sys.path.insert(0, "/home/geraldadmin/airflow/dags")
 
         import logging
 
