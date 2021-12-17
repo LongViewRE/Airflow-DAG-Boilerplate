@@ -2,7 +2,6 @@ import json
 from datetime import datetime
 
 from airflow.decorators import dag, task
-from airflow.operators.python import PythonVirtualenvOperator
 
 @dag(schedule_interval=None, start_date=datetime(2021, 12, 16), catchup=False, tags=['gerald'])
 def gerald_syncing():
@@ -24,28 +23,18 @@ def gerald_syncing():
         sys.path.insert(0, "/home/geraldadmin/airflow/dags")
 
         import logging
+        logging.getLogger().setLevel(logging.INFO)
 
-        from gerald_syncing.PullFromRPS.utils import contact_comparison
         from gerald_syncing.PullFromRPS.sync import sync_test
         
+        from airflow.hooks.base import BaseHook
         from LV_db_connection import GremlinClient
-        from LV_external_services import RPSClient
-
-        logging.info("created DAG")
-        try:
-            g = GremlinClient()
-        except Exception as e:
-            logging.error("Exception gremlin", exc_info=True)
-
-        try: 
-            r = RPSClient()
-        except Exception as e:
-            logging.error("Exception rps", exc_info=True)
         
-        try:
-            contact_comparison()
-        except Exception as e:
-            logging.error("Exception contact", exc_info=True)
+        p = BaseHook().get_connection('gerald').get_password()
+        g = GremlinClient("/dbs/gerald/colls/clients", p)
+
+        res = g.submit("g.V('1')")
+        logging.info(str(len(res)))
 
 
     pull_from_RPS()
