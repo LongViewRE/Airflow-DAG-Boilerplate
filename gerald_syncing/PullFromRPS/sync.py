@@ -31,12 +31,16 @@ import add_item, archive_item, add_contact, replace_edge, add_landlord, \
 
 def main(rps_key, gerald_username, gerald_password):
     # Initialise clients
-    rps = RPSClient(rps_key)
-    gerald = GremlinClient(gerald_username, gerald_password)
-    property_client = PropertiesClient(gerald_username, gerald_password)
+    try:
+        rps = RPSClient(rps_key)
+        gerald = GremlinClient(gerald_username, gerald_password)
+        property_client = PropertiesClient(gerald_username, gerald_password)
 
     
-    sync(rps, gerald, property_client)
+        sync(rps, gerald, property_client)
+    except Exception as e:
+        print("exception lol fuk u")
+        print(e)
 
 ###############################################################################
 # SYNC LOGIC                                                                  #

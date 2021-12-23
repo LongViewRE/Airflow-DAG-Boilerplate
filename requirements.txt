@@ -1,10 +1,6 @@
-# DO NOT include azure-functions-worker in this file
-# The Python Worker is managed by Azure Functions platform
-# Manually managing azure-functions-worker may cause unexpected issues
 
-azure-functions
 python-dotenv
 thefuzz[speedup]
-git+https://github.com/LongViewRE/LV_db_connection
-git+https://github.com/LongViewRE/LV_external_services
-git+https://github.com/LongViewRE/LV_general_functions
+git+ssh://git@github.com/LongViewRE/LV_db_connection
+git+ssh://git@github.com/LongViewRE/LV_external_services
+git+ssh://git@github.com/LongViewRE/LV_general_functions
