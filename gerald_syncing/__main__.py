@@ -1,5 +1,5 @@
 ###############################################################################
-# __main__.py                                                                     #
+# __main__.py                                                                 #
 # Main driver file that parses command line args and executes whichever sync  #
 # module is called                                                            #
 ###############################################################################
