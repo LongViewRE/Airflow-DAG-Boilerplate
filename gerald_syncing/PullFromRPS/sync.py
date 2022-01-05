@@ -39,8 +39,9 @@ def main(rps_key, gerald_username, gerald_password):
     
         sync(rps, gerald, property_client)
     except Exception as e:
-        print("exception lol fuk u")
-        print(e)
+        logging.error("exception lol fuk u", exc_info=True)
+        logging.warning("warning here")
+        logging.info("information here")
 
 ###############################################################################
 # SYNC LOGIC                                                                  #

@@ -22,7 +22,9 @@ def gerald_syncing():
         image="lvdocker.azurecr.io/gerald-syncing:latest", 
         task_id='PullFromRPS',
         command='PullFromRPS',
-        private_environment=credentials
+        private_environment=credentials,
+        tty=True,
+        force_pull=True
     )
         
 gerald_syncing = gerald_syncing()

@@ -3,6 +3,8 @@
 # Main driver file that parses command line args and executes whichever sync  #
 # module is called                                                            #
 ###############################################################################
+import sys
+import logging
 import argparse
 
 import gerald_syncing.PullFromRPS.sync
@@ -16,6 +18,7 @@ def main():
 
     args = parser.parse_args()
 
+    logging.basicConfig(stream=sys.stdout, level=logging.INFO)
     if args.module == "PullFromRPS":
         gerald_syncing.PullFromRPS.sync.main(1,2,3)
     else:
