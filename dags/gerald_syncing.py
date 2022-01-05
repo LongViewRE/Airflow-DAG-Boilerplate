@@ -12,7 +12,7 @@ credentials = {
         "rps_key" : Variable.get("rps_api_key")
     }
 
-@dag(schedule_interval=None, start_date=datetime(2021, 12, 16), catchup=False, tags=['gerald'])
+@dag(schedule_interval="0 0 * * *", start_date=datetime(2021, 12, 16), catchup=False, tags=['gerald'])
 def gerald_syncing():
     """
     This DAG handles syncing data to Gerald.

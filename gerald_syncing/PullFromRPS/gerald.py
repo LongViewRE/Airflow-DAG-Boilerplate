@@ -204,8 +204,8 @@ def check_contact(gerald, contact):
     type = "Company" if contact["id"][:3] == "cmp" else "contact"
     email = contact["email"]
     mobile = contact["mobile"]
-    query = "g.V()"
-
+    query = f"g.V('{contact['id']}').fold().coalesce(unfold(), "
+    query += "g.V()"
     # Contacts are considered identical if they match on first name,
     # last name, and at least one of (email, mobile, address)
     if type == "contact":
@@ -226,7 +226,7 @@ def check_contact(gerald, contact):
         query += f"__.has('mobile', '{mobile}'),"
     if len(contact["address"]) > 0:
         query += f"__.has('address', '{contact['address']}'),"
-    query += ").dedup()"
+    query += ")).dedup()"
 
     return gerald.submit(query)
 

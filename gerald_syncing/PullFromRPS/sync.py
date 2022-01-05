@@ -9,7 +9,6 @@ import logging
 import datetime as dt
 
 from copy import deepcopy
-from dotenv import load_dotenv
 from functools import reduce
 from itertools import product
 
@@ -30,18 +29,14 @@ import add_item, archive_item, add_contact, replace_edge, add_landlord, \
 ###############################################################################
 
 def main(rps_key, gerald_username, gerald_password):
-    # Initialise clients
-    try:
-        rps = RPSClient(rps_key)
-        gerald = GremlinClient(gerald_username, gerald_password)
-        property_client = PropertiesClient(gerald_username, gerald_password)
 
-    
-        sync(rps, gerald, property_client)
-    except Exception as e:
-        logging.error("exception lol fuk u", exc_info=True)
-        logging.warning("warning here")
-        logging.info("information here")
+    # Initialise clients
+    rps = RPSClient(rps_key)
+    gerald = GremlinClient(gerald_username, gerald_password)
+    property_client = PropertiesClient(gerald_username, gerald_password)
+
+    sync(rps, gerald, property_client)
+        
 
 ###############################################################################
 # SYNC LOGIC                                                                  #
@@ -49,7 +44,8 @@ def main(rps_key, gerald_username, gerald_password):
 
 def sync(rps, gerald, property_client):
     """
-    Main function that syncs RPS and Gerald.
+    Syncs RPS and Gerald by generating queries to reconcile differences
+    and then executing them.
     """
     queries = []
     rps_props, gerald_props = retrieve_properties(rps, property_client)
@@ -62,14 +58,13 @@ def sync(rps, gerald, property_client):
     logging.info("Constructed all queries")
 
     for query in queries:
+        qstring = json.dumps(query, indent=4)
         try:
             submit_all(gerald, query['vertices'])
             submit_all(gerald, query['edges'])
-            logging.info(f"Submitted queries for property {query['id']}")
+            logging.info(f"Submitted queries for property {query['id']}: {qstring}")
         except Exception as e:
-            logging.error(f"Error submitting queries for {query['id']}", exc_info=True)
-            with open("logs/errors.log", "a") as f:
-                json.dump(query, f, indent=4)
+            logging.error(f"Error submitting queries for {query['id']}: {qstring}", exc_info=True)
 
     logging.info("Submitted all queries")
 
@@ -308,11 +303,11 @@ def compare_contact(gerald, parent_id, tuple):
 # TESTING                                                                     #
 ###############################################################################
 def test(rps, gerald):
-    with open('queries/gerald.json') as f:
+    with open('gerald_syncing/PullFromRPS/queries/gerald.json') as f:
         gerald_props = json.load(f)
         gerald_props = [align_format_gerald(p) for p in gerald_props]
 
-    with open('queries/rps.json') as f:
+    with open('gerald_syncing/PullFromRPS/queries/rps.json') as f:
         rps_props = json.load(f)
         rps_props = list(rps_props.values())
         rps_props = [align_format_rps(p) for p in rps_props]
@@ -325,13 +320,13 @@ def test(rps, gerald):
     queries += [compare_item(gerald, p) for p in to_compare]
 
     logging.info("Constructed all queries")
-    with open('queries/to_add_old.json', 'w') as f:
+    with open('gerald_syncing/PullFromRPS/queries/to_add.json', 'w') as f:
         json.dump(to_add, f, indent=4)
-    with open('queries/to_archive_old.json', 'w') as f:
+    with open('gerald_syncing/PullFromRPS/queries/to_archive.json', 'w') as f:
         json.dump(to_archive, f, indent=4)
-    with open('queries/to_compare_old.json', 'w') as f:
+    with open('gerald_syncing/PullFromRPS/queries/to_compare.json', 'w') as f:
         json.dump(to_compare, f, indent=4)
-    with open('queries/queries_old.json', 'w') as f:
+    with open('gerald_syncing/PullFromRPS/queries/queries_v2.json', 'w') as f:
         json.dump(queries, f, indent=4)
 
 def sync_test(rps, gerald, property_client):
@@ -364,7 +359,6 @@ def sync_test(rps, gerald, property_client):
                 json.dump(query, f, indent=4)
 
     logging.info("Submitted all queries")
-
 
 
 
