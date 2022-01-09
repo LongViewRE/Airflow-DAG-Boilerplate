@@ -60,8 +60,7 @@ def sync(rps, gerald, property_client):
     for query in queries:
         qstring = json.dumps(query, indent=4)
         try:
-            submit_all(gerald, query['vertices'])
-            submit_all(gerald, query['edges'])
+            submit_all(gerald, query)
             logging.info(f"Submitted queries for property {query['id']}: {qstring}")
         except Exception as e:
             logging.error(f"Error submitting queries for {query['id']}: {qstring}", exc_info=True)
