@@ -49,6 +49,7 @@ def add_property(gerald, prop):
 
     if len(res) > 0:
         vquery = f"g.V('{property['id']}')"
+        property.pop('system', None) # system is a partition key so is immutable
     else: 
         vquery = f"g.addV('property').property('id','{property['id']}')"
 
@@ -75,6 +76,7 @@ def add_landlord(gerald, ll, prop_id):
 
     if len(res) > 0:
         vquery = f"g.V('{landlord['id']}')"
+        landlord.pop('system', None)
     else:
         vquery = f"g.addV('landlord').property('id','{landlord['id']}')"
     
@@ -111,8 +113,10 @@ def add_tenancy(gerald, ten, prop_id):
 
     if len(res) > 0:
         vquery = f"g.V('{tenancy['id']}')"
+        tenancy.pop('system', None)
     else: 
         vquery = f"g.addV('tenant').property('id','{tenancy['id']}')"
+        
     
     contacts = tenancy.pop('contacts', None)
     tt_id = tenancy.pop('id', None)
@@ -168,11 +172,12 @@ def add_contact(gerald, parent_id, con):
                 else: 
                     vquery = (  f"g.V('{cc_id}').coalesce("
                                 f"__.has('altEmail','{email}')"
-                                f",__.property(list,'altEmail','{email}')")
+                                f",__.property(list,'altEmail','{email}'))")
                 queries.append({"vertices": [vquery], "edges": []})
         
         vquery = f"g.V('{cc_id}')"
         contact['rpsID'] = contact.pop('id')
+        contact.pop('system', None)
     else:
         # A completely new contact
         cc_id = contact.pop('id', None)
@@ -187,7 +192,7 @@ def add_contact(gerald, parent_id, con):
 
     equery = (  f"g.V('{cc_id}')"
                 f".coalesce("
-                f"__.outE('is a').to(g.V('{parent_id}')),"
+                f"__.outE('is a').inV().has('id', eq('{parent_id}')),"
                 f"__.addE('is a').to(g.V('{parent_id}')))")
     
     queries.append({"vertices": [vquery], "edges": [equery]})
@@ -251,7 +256,7 @@ def add_company_contacts(gerald, company):
         c = gerald.parse_graph_json(item)
         equery = (  f"g.V('{c['id']}')"
                 f".coalesce("
-                f"__.outE('is part of').to(g.V('{cmp_id}')),"
+                f"__.outE('is part of').inV().has('id', eq('{cmp_id}')),"
                 f"__.addE('is part of').to(g.V('{cmp_id}')))")
         equeries.append(equery)
     

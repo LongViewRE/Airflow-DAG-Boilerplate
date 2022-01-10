@@ -179,6 +179,7 @@ def align_format_rps(rps_property):
 
         rps_property['tenancy']['contacts'] = \
             [align_contact_rps(c) for c in rps_property['tenancy']['contacts']]
+        rps_property['tenancy']['system'] = "RPS"
     
     return rps_property
 
