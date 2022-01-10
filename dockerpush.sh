@@ -3,7 +3,8 @@
 # Provide it with a version number - if this matches the last version, it
 # will overwrite the existing docker image, otherwise it will create a new
 # image. In both cases, the latest tag is set to the given version.
-# Usage: ./dockerpush.sh <NAME> <VERSION NO.>
+
+# USAGE: ./dockerpush.sh <NAME> <VERSION NO.>
 # eg. ./dockerpush.sh gerald-syncing v1.1
 
 # Start ssh agent 
