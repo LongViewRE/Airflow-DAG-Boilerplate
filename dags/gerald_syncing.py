@@ -5,6 +5,7 @@ from airflow.decorators import dag, task
 from airflow.hooks.base import BaseHook
 from airflow.models import Variable
 from airflow.providers.docker.operators.docker import DockerOperator
+from docker.types import Mount
 
 credentials = {
         "gerald_password": BaseHook().get_connection('gerald').get_password(),
@@ -34,7 +35,8 @@ def gerald_syncing():
                         private_environment=credentials,
                         tty=True,
                         force_pull=True,
-                        mounts=["/home/geraldadmin/airflow/tmpdata:/tmpdata"]
+                        mounts=[Mount(source="/home/geraldadmin/airflow/tmpdata", 
+                                    target="/tmpdata", type="bind")]
                     )
                             
     tasks["PullFromRPS"]["pull"] >> tasks["PullFromRPS"]["process"] >> tasks["PullFromRPS"]["push"]
