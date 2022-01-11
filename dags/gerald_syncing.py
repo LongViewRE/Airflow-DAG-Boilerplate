@@ -12,19 +12,30 @@ credentials = {
         "rps_key" : Variable.get("rps_api_key")
     }
 
-@dag(schedule_interval="0 0 * * *", start_date=datetime(2021, 12, 16), catchup=False, tags=['gerald'])
+@dag(schedule_interval="0 0 * * *", start_date=datetime(2021, 12, 16), catchup=False, tags=['gerald'],
+    max_active_runs=1)
 def gerald_syncing():
     """
     This DAG handles syncing data to Gerald.
     """
-    
-    task1 = DockerOperator(
-        image="lvdocker.azurecr.io/gerald-syncing:latest", 
-        task_id='PullFromRPS',
-        command='PullFromRPS',
-        private_environment=credentials,
-        tty=True,
-        force_pull=True
-    )
-        
+    # Add modules to this list once complete (and pull, process, push methods implemented)
+    modules = ["PullFromRPS"]
+    task_types = ["pull", "process", "push"]
+
+    tasks = {}
+    for module in modules:
+        tasks[module] = {}
+        for task_type in task_types:
+            tasks[module][task_type] = \
+                    DockerOperator(
+                        image="lvdocker.azurecr.io/gerald-syncing:latest", 
+                        task_id=f'{module}_{task_type}',
+                        command=f'{module} {task_type}',
+                        private_environment=credentials,
+                        tty=True,
+                        force_pull=True
+                    )
+                            
+    tasks["PullFromRPS"]["pull"] >> tasks["PullFromRPS"]["process"] >> tasks["PullFromRPS"]["push"]
+
 gerald_syncing = gerald_syncing()

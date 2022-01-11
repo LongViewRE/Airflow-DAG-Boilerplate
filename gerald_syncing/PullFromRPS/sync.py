@@ -28,44 +28,68 @@ import add_item, archive_item, add_contact, replace_edge, add_landlord, \
 # MAIN FUNCTION                                                               #
 ###############################################################################
 
-def main(rps_key, gerald_username, gerald_password):
+class PullFromRPS():
 
-    # Initialise clients
-    rps = RPSClient(rps_key)
-    gerald = GremlinClient(gerald_username, gerald_password)
-    property_client = PropertiesClient(gerald_username, gerald_password)
+    def __init__(self, rps_key, gerald_username, gerald_password) -> None:
+        self.rps = RPSClient(rps_key)
+        self.gerald = GremlinClient(gerald_username, gerald_password)
+        self.property_client = PropertiesClient(gerald_username, gerald_password)
 
-    sync(rps, gerald, property_client)
+    def pull(self):
+        """
+        Pulls property information from RPS and Gerald, storing it in a tmp file.
+        """
+        rps_props, gerald_props = retrieve_properties(self.rps, self.property_client)
+
+        with open("/tmpdata/rps.json", "w") as f:
+            json.dump(rps_props, f)
         
+        with open("/tmpdata/gerald.json", "w") as f:
+            json.dump(gerald_props, f)
+
+    def process(self):
+        """
+        Compares the RPS and Gerald properties and generates queries to reconcile
+        differences. Saves queries to a tmp file.
+        """
+        with open("/tmpdata/rps.json", "r") as f:
+            rps_props = json.load(f)
+        
+        with open("/tmpdata/gerald.json", "r") as f:
+            gerald_props = json.load(f)
+
+        to_add, to_archive, to_compare = sync_partition(rps_props, gerald_props)
+
+        queries = []
+        queries += [add_item(self.gerald, p) for p in to_add]
+        queries += [archive_item(p) for p in to_archive]
+        queries += [compare_item(self.gerald, p) for p in to_compare]
+
+        logging.info("Constructed all queries")
+
+        with open("/tmpdata/queries.json", "w") as f:
+            json.dump(queries, f)
+
+    def push(self):
+        """
+        Executes the queries on Gerald.
+        """
+        with open("/tmpdata/queries.json", "r") as f:
+            queries = json.load(f)
+        
+        for query in queries:
+            qstring = json.dumps(query, indent=4)
+            try:
+                submit_all(self.gerald, query)
+                logging.info(f"Submitted queries for property {query['id']}: {qstring}")
+            except Exception as e:
+                logging.error(f"Error submitting queries for {query['id']}: {qstring}", exc_info=True)
+
+        logging.info("Submitted all queries")
 
 ###############################################################################
 # SYNC LOGIC                                                                  #
 ###############################################################################
-
-def sync(rps, gerald, property_client):
-    """
-    Syncs RPS and Gerald by generating queries to reconcile differences
-    and then executing them.
-    """
-    queries = []
-    rps_props, gerald_props = retrieve_properties(rps, property_client)
-    to_add, to_archive, to_compare = sync_partition(rps_props, gerald_props)
-
-    queries += [add_item(gerald, p) for p in to_add]
-    queries += [archive_item(p) for p in to_archive]
-    queries += [compare_item(gerald, p) for p in to_compare]
-
-    logging.info("Constructed all queries")
-
-    for query in queries:
-        qstring = json.dumps(query, indent=4)
-        try:
-            submit_all(gerald, query)
-            logging.info(f"Submitted queries for property {query['id']}: {qstring}")
-        except Exception as e:
-            logging.error(f"Error submitting queries for {query['id']}: {qstring}", exc_info=True)
-
-    logging.info("Submitted all queries")
 
 def sync_partition(rps_props, gerald_props):
     """
