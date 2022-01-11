@@ -28,8 +28,12 @@ import add_item, archive_item, add_contact, replace_edge, add_landlord, \
 # MAIN FUNCTION                                                               #
 ###############################################################################
 
-class PullFromRPS():
-
+class PullFromRPSFacade():
+    """
+    This class is a facade for the PullFromRPS module, and provides three 
+    functions (pull, process, push). These functions will be sequentially 
+    called as Airflow tasks.
+    """
     def __init__(self, rps_key, gerald_username, gerald_password) -> None:
         self.rps = RPSClient(rps_key)
         self.gerald = GremlinClient(gerald_username, gerald_password)
@@ -41,10 +45,10 @@ class PullFromRPS():
         """
         rps_props, gerald_props = retrieve_properties(self.rps, self.property_client)
 
-        with open("/tmpdata/rps.json", "w") as f:
+        with open("/tmpdata/PullFromRPS_rps.json", "w") as f:
             json.dump(rps_props, f)
         
-        with open("/tmpdata/gerald.json", "w") as f:
+        with open("/tmpdata/PullFromRPS_gerald.json", "w") as f:
             json.dump(gerald_props, f)
 
     def process(self):
@@ -52,10 +56,10 @@ class PullFromRPS():
         Compares the RPS and Gerald properties and generates queries to reconcile
         differences. Saves queries to a tmp file.
         """
-        with open("/tmpdata/rps.json", "r") as f:
+        with open("/tmpdata/PullFromRPS_rps.json", "r") as f:
             rps_props = json.load(f)
         
-        with open("/tmpdata/gerald.json", "r") as f:
+        with open("/tmpdata/PullFromRPS_gerald.json", "r") as f:
             gerald_props = json.load(f)
 
         to_add, to_archive, to_compare = sync_partition(rps_props, gerald_props)
@@ -67,14 +71,14 @@ class PullFromRPS():
 
         logging.info("Constructed all queries")
 
-        with open("/tmpdata/queries.json", "w") as f:
+        with open("/tmpdata/PullFromRPS_queries.json", "w") as f:
             json.dump(queries, f)
 
     def push(self):
         """
         Executes the queries on Gerald.
         """
-        with open("/tmpdata/queries.json", "r") as f:
+        with open("/tmpdata/PullFromRPS_queries.json", "r") as f:
             queries = json.load(f)
         
         for query in queries:

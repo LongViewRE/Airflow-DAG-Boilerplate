@@ -8,7 +8,7 @@ import sys
 import logging
 import argparse
 
-import gerald_syncing.PullFromRPS.sync
+from gerald_syncing.PullFromRPS.sync import PullFromRPSFacade
 
 def main():
     
@@ -31,7 +31,7 @@ def main():
     args = parser.parse_args()
 
     if args.module == "PullFromRPS":
-        c = gerald_syncing.PullFromRPS.PullFromRPS(rps_key, gerald_username, gerald_password)
+        c = PullFromRPSFacade(rps_key, gerald_username, gerald_password)
         if args.task == "pull":
             c.pull()
         elif args.task == "process":

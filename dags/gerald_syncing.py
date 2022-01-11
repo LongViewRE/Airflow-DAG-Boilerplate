@@ -33,7 +33,8 @@ def gerald_syncing():
                         command=f'{module} {task_type}',
                         private_environment=credentials,
                         tty=True,
-                        force_pull=True
+                        force_pull=True,
+                        mounts=["/home/geraldadmin/airflow/tmpdata:/tmpdata"]
                     )
                             
     tasks["PullFromRPS"]["pull"] >> tasks["PullFromRPS"]["process"] >> tasks["PullFromRPS"]["push"]
