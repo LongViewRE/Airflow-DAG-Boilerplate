@@ -7,8 +7,9 @@
 # USAGE: ./dockerpush.sh <NAME> <VERSION NO.>
 # eg. ./dockerpush.sh gerald-syncing v1.1
 
-# Start ssh agent 
+# Start ssh agent and add the key you use for github
 eval `ssh-agent`
+ssh-add ~/.ssh/id_ed25519
 
 # Build image
 docker build --ssh default --tag $1 .
