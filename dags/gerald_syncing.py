@@ -1,5 +1,5 @@
 import json
-from datetime import datetime
+from datetime import datetime, timedelta
 
 from airflow.decorators import dag, task
 from airflow.hooks.base import BaseHook
@@ -13,8 +13,13 @@ credentials = {
         "rps_key" : Variable.get("rps_api_key")
     }
 
+default_args = {
+    'retries': 1,
+    'retry_delay': timedelta(minutes=2)
+}
+
 @dag(schedule_interval="0 0 * * *", start_date=datetime(2021, 12, 16), catchup=False, tags=['gerald'],
-    max_active_runs=1, retries=1)
+    max_active_runs=1, default_args=default_args)
 def gerald_syncing():
     """
     This DAG handles syncing data to Gerald.
