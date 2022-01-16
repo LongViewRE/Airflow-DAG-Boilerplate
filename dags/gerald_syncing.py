@@ -14,7 +14,7 @@ credentials = {
     }
 
 @dag(schedule_interval="0 0 * * *", start_date=datetime(2021, 12, 16), catchup=False, tags=['gerald'],
-    max_active_runs=1)
+    max_active_runs=1, retries=1)
 def gerald_syncing():
     """
     This DAG handles syncing data to Gerald.
