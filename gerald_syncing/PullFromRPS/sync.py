@@ -46,10 +46,10 @@ class PullFromRPSFacade():
         rps_props, gerald_props = retrieve_properties(self.rps, self.property_client)
 
         with open("/tmpdata/PullFromRPS_rps.json", "w") as f:
-            json.dump(rps_props, f)
+            json.dump(rps_props, f, indent=4)
         
         with open("/tmpdata/PullFromRPS_gerald.json", "w") as f:
-            json.dump(gerald_props, f)
+            json.dump(gerald_props, f, indent=4)
 
     def process(self):
         """
@@ -72,7 +72,7 @@ class PullFromRPSFacade():
         logging.info("Constructed all queries")
 
         with open("/tmpdata/PullFromRPS_queries.json", "w") as f:
-            json.dump(queries, f)
+            json.dump(queries, f, indent=4)
 
     def push(self):
         """
@@ -85,7 +85,6 @@ class PullFromRPSFacade():
             qstring = json.dumps(query, indent=4)
             try:
                 submit_all(self.gerald, query)
-                logging.info(f"Submitted queries for property {query['id']}: {qstring}")
             except Exception as e:
                 logging.error(f"Error submitting queries for {query['id']}: {qstring}", exc_info=True)
 
