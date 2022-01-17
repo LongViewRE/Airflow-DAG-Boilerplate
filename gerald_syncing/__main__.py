@@ -9,6 +9,7 @@ import logging
 import argparse
 
 from gerald_syncing.PullFromRPS.sync import PullFromRPSFacade
+from gerald_syncing.UpdateEmployees.assemble import PullFromGeraldFacade
 
 def main():
     
@@ -32,6 +33,14 @@ def main():
 
     if args.module == "PullFromRPS":
         c = PullFromRPSFacade(rps_key, gerald_username, gerald_password)
+        if args.task == "pull":
+            c.pull()
+        elif args.task == "process":
+            c.process()
+        elif args.task == "push":
+            c.push()
+    if args.module == "UpdateEmployees":
+        c = PullFromGeraldFacade(rps_key, gerald_username, gerald_password)
         if args.task == "pull":
             c.pull()
         elif args.task == "process":
