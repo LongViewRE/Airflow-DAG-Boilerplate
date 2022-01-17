@@ -80,15 +80,15 @@ def add_pm(gerald, pm, prop_id):
     if len(res) == 0:
         raise Exception(f"Property manager not found: {email}")
     else:
-        pm_node = gerald.parse_graph_json(res)
+        # assume the first is the correct and only result
+        pm_node = gerald.parse_graph_json(res[0])
         pm_id = pm_node['id']
 
-    equery = f"""
-            g.V('{pm_id}')
-            .coalesce(
-            __.outE('manages').inV().has('id', eq('{prop_id}')),
-            __.addE('manages').to(g.V('{prop_id}')))
-            """
+    equery = (  f"g.V('{pm_id}')"
+                f".coalesce("
+                f"__.outE('manages').inV().has('id', eq('{prop_id}')),"
+                f"__.addE('manages').to(g.V('{prop_id}')))")
+
     queries.append({"vertices": [], "edges": [equery]})
 
     queries = reduce(flatten, queries, {"vertices": [], "edges": []})

@@ -337,7 +337,10 @@ def compare_contact(gerald, parent_id, tuple):
     # Check if any differences exist
     update_required = False
     for key,value in rps_contact.items():
-        if key not in gerald_contact.keys() or gerald_contact[key] != value:
+        if key in ["id", "system"]:
+            # skip the ID/system as it may be different for the same contact
+            continue
+        elif key not in gerald_contact.keys() or gerald_contact[key] != value:
             update_required = True
     
     # If they do, just call the add_property function, as it checks
