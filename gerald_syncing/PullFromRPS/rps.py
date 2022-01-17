@@ -17,6 +17,7 @@ def get_properties_rps(rps):
     for prop in props:
         if 'Negotiator' in prop:
             prop['pm'] = prop['Negotiator']['Name']
+            prop['property_manager'] = {'email': prop['Negotiator']['Email']}
             prop.pop('Negotiator', None)
         
         if 'Landlord' in prop:
