@@ -43,7 +43,7 @@ def gerald_syncing():
                         mounts=[Mount(source="/home/geraldadmin/airflow/tmpdata", 
                                     target="/tmpdata", type="bind")]
                     )
-                            
+
     tasks["PullFromRPS"]["pull"] >> tasks["PullFromRPS"]["process"] >> tasks["PullFromRPS"]["push"]
 
 gerald_syncing = gerald_syncing()

@@ -23,9 +23,11 @@ def add_item(gerald, rps_prop):
 
     rps_landlord = rps_property.pop('landlord', None)
     rps_tenancy = rps_property.pop('tenancy', None)
+    rps_pm = rps_property.pop('property_manager', None)
     prop_id = rps_property['id']
 
     queries.append(add_property(gerald, rps_property))
+    queries.append(add_pm(gerald, rps_pm, prop_id))
 
     if len(rps_landlord) > 0:
         queries.append(add_landlord(gerald, rps_landlord, prop_id))
@@ -59,6 +61,35 @@ def add_property(gerald, prop):
     
     vquery += f".property('Last Updated', {int(time.time())})"
     queries.append({"vertices": [vquery], "edges": []})
+
+    queries = reduce(flatten, queries, {"vertices": [], "edges": []})
+    return queries
+
+def add_pm(gerald, pm, prop_id):
+    """
+    Returns gremlin queries to add a connection to a property manager employee
+    node.
+    """
+    property_manager = deepcopy(pm)
+    email = property_manager['email'].lower()
+    queries = []
+
+    search_query = f"g.V().hasLabel('employee').has('email','{email}')"
+    res = gerald.submit(search_query)
+
+    if len(res) == 0:
+        raise Exception(f"Property manager not found: {email}")
+    else:
+        # assume the first is the correct and only result
+        pm_node = gerald.parse_graph_json(res[0])
+        pm_id = pm_node['id']
+
+    equery = (  f"g.V('{pm_id}')"
+                f".coalesce("
+                f"__.outE('manages').inV().has('id', eq('{prop_id}')),"
+                f"__.addE('manages').to(g.V('{prop_id}')))")
+
+    queries.append({"vertices": [], "edges": [equery]})
 
     queries = reduce(flatten, queries, {"vertices": [], "edges": []})
     return queries
@@ -265,15 +296,21 @@ def add_company_contacts(gerald, company):
 ###############################################################################
 # VERTEX/EDGE ARCHIVAL/REMOVAL FUNCTIONS                                      #
 ###############################################################################
-def archive_item(rps_prop):
+def archive_item(gerald_prop):
     """
     Sets the status of a property to 'not under management', effectively
     archiving it. Returns the query to do so.
     """
-    query = (   f"g.V('{rps_prop['id']}')"
+    vquery = (   f"g.V('{gerald_prop['id']}')"
                 f".property('status','not under management')"
                 f".property('Last Updated', {int(time.time())})")
-    return {"id": rps_prop['id'], "vertices": [query], "edges": []}
+
+    pm = gerald_prop['property_manager']
+    if pm is not None:
+        equery = replace_edge(gerald_prop['id'], 'manages', 'stopped managing', pm)
+        equery = equery["edges"][0]
+    
+    return {"id": gerald_prop['id'], "vertices": [vquery], "edges": [equery]}
 
 def replace_edge(parent_id, old_label, new_label, node):
     """
