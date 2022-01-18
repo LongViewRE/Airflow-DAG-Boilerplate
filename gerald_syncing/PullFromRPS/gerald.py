@@ -78,7 +78,8 @@ def add_pm(gerald, pm, prop_id):
     res = gerald.submit(search_query)
 
     if len(res) == 0:
-        raise Exception(f"Property manager not found: {email}")
+        logging.error(f"Property manager not found: {email}")
+        return {"vertices": [], "edges": []}
     else:
         # assume the first is the correct and only result
         pm_node = gerald.parse_graph_json(res[0])
