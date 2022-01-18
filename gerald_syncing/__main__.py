@@ -8,8 +8,8 @@ import sys
 import logging
 import argparse
 
+from gerald_syncing.PullFromAzure.assemble import PullFromAzure
 from gerald_syncing.PullFromRPS.sync import PullFromRPSFacade
-from gerald_syncing.UpdateEmployees.assemble import PullFromGeraldFacade
 
 def main():
     
@@ -40,7 +40,7 @@ def main():
         elif args.task == "push":
             c.push()
     if args.module == "UpdateEmployees":
-        c = PullFromGeraldFacade(rps_key, gerald_username, gerald_password)
+        c = PullFromAzure(rps_key, gerald_username, gerald_password)
         if args.task == "pull":
             c.pull()
         elif args.task == "process":
