@@ -25,7 +25,7 @@ def gerald_syncing():
     This DAG handles syncing data to Gerald.
     """
     # Add modules to this list once complete (and pull, process, push methods implemented)
-    modules = ["PullFromRPS"]
+    modules = ["UpdateEmployees"]
     task_types = ["pull", "process", "push"]
 
     tasks = {}
@@ -44,6 +44,6 @@ def gerald_syncing():
                                     target="/tmpdata", type="bind")]
                     )
                             
-    tasks["PullFromRPS"]["pull"] >> tasks["PullFromRPS"]["process"] >> tasks["PullFromRPS"]["push"]
+    tasks["UpdateEmployees"]["pull"] >> tasks["UpdateEmployees"]["process"] >> tasks["UpdateEmployees"]["push"]
 
 gerald_syncing = gerald_syncing()
