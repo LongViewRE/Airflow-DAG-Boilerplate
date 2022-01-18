@@ -6,9 +6,12 @@ import json
 import logging
 
 from LV_db_connection import GremlinClient
-#from LV_db_connection import connect_sql_app
+from LV_db_connection import connect_sql_app
 from LV_external_services import MSGraphClient
-from employees.UpdateEmployees.gerald import get_employees, format_queries
+
+from UpdateEmployees.gerald import get_employees, format_queries
+from UpdateEmployees.update_gr import gr_create_employees, gr_missing_employees
+from UpdateEmployees.update_artemis import appr_create_employees, appr_missing_employees
 
 """
 Class that pulls employees from Gerald, checks if all employees are accounted for and creates
@@ -18,7 +21,7 @@ class PullFromGeraldFacade():
     def __init__(self, gerald_username, gerald_password, db_username, db_password) -> None:
         self.Gerald = GremlinClient(gerald_username, gerald_password)
         self.AzureAD = MSGraphClient(db_username, db_password)
-        #self.sql = connect_sql_app('GuaranteedRent')
+        self.grcursor = connect_sql_app('GuaranteedRent')
     
     def pull(self):
         """
@@ -30,6 +33,9 @@ class PullFromGeraldFacade():
         with open("/tmpdata/Employees_gerald.json", "w") as f:
             json.dump(gerald_emps, f)
     
+        gr_emps = self.grcursor.execute("SELECT * FROM employees")
+        with open("/tmpdata/Employees_gr.json", "w") as f:
+            json.dump(gr_emps, f)
 
     def process(self):
         """
@@ -44,6 +50,17 @@ class PullFromGeraldFacade():
         with open("/tmpdata/Employees_geraldqueries.json", "w") as f:
             json.dump(queries, f)
 
+
+        with open("/tmpdata/Employees_gr.json", "r") as f:
+            gr_emps = json.load(f)
+        
+        gr_missing = gr_missing_employees(gr_emps, gerald_emps)
+        with open("/tmpdata/Employees_grmissing.json", "w") as f:
+            json.dump(gr_missing, f)
+
+        
+        
+
     def push(self):
         """
         Executes queries on Gerald
@@ -52,6 +69,9 @@ class PullFromGeraldFacade():
         with open("/tmpdata/Employees_geraldqueries.json", "r") as f:
             queries = json.load(f)
         
+        with open("/tmpdata/Employees_gerald.json", "r") as f:
+            gerald_emps = json.load(f)
+
         for query in queries:
             qstring = json.dumps(query, indent=4)
             try:
@@ -60,5 +80,9 @@ class PullFromGeraldFacade():
             except Exception as e:
                 logging.error(f"Error submitting queries for {query['id']}: {qstring}", exc_info=True)
 
+        with open("/tmpdata/Employees_grmissing.json", "r") as f:
+            gr_missing = json.load(f)
+
+        gr_create_employees(gr_missing, gerald_emps)
         logging.info("Submitted all queries")
 
