@@ -9,9 +9,9 @@ from LV_db_connection import GremlinClient
 from LV_db_connection import connect_sql_app
 from LV_external_services import MSGraphClient
 
-from PullFromAzure.gerald import get_employees, format_queries
-from PullFromAzure.update_gr import gr_create_employees, gr_missing_employees
-from PullFromAzure.update_artemis import appr_create_employees, appr_missing_employees
+from gerald_syncing.PullFromAzure.gerald import get_employees, format_queries
+from gerald_syncing.PullFromAzure.update_gr import gr_create_employees, gr_missing_employees
+from gerald_syncing.PullFromAzure.update_artemis import appr_create_employees, appr_missing_employees
 
 """
 Class that pulls employees from Gerald, checks if all employees are accounted for and creates
