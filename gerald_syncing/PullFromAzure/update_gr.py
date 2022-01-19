@@ -1,5 +1,3 @@
-from LV_db_connection import execute
-
 def gr_missing_employees(gr_emps, gerald_emps):
     emps_to_create = []
 
