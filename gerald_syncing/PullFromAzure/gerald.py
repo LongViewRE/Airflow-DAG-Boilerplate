@@ -1,12 +1,5 @@
-def get_employees(self):
+def get_employees(employees_json):
     employees = []
-    employees_json = []
-
-    # returns a json object of users
-    tmp = self.AzureAD.retrieve_employees()
-
-    #a list of objects where each object is an employee containing their info - name, mail, id, licenses
-    employees_json = tmp['value']
         
     for i in employees_json:
         #if statement to check if employee is still active
@@ -31,7 +24,7 @@ def get_employees(self):
             
     return employees
 
-def format_queries(employees, self):
+def format_queries(employees):
     empV = []
     for e in employees:
         # id, email, first name, last name, active 
