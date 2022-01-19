@@ -31,7 +31,7 @@ def azure_syncing():
     """
     # Add modules to this list once complete (and pull, process, push methods implemented)
     modules = ["PullFromAzure"]
-    task_types = ["pull", "process", "pushgerald", "pughgr"]
+    task_types = ["pull", "process", "pushgerald", "pushgr"]
 
     tasks = {}
     for module in modules:
