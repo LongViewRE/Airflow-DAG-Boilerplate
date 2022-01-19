@@ -5,7 +5,6 @@ from dotenv import load_dotenv
 
 from LV_external_services import MSGraphClient
 from LV_db_connection import GremlinClient
-import azure.functions as func
 
 #returns all active employees 
 def get_employees(AzureAD):

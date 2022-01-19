@@ -18,14 +18,16 @@ default_args = {
     'retry_delay': timedelta(minutes=2)
 }
 
-@dag(schedule_interval="0 0 * * *", start_date=datetime(2021, 12, 16), catchup=False, tags=['gerald'],
+@dag(schedule_interval="0 0 * * *", start_date=datetime(2021, 12, 16), catchup=False, tags=['gerald', 'rps'],
     max_active_runs=1, default_args=default_args)
-def gerald_syncing():
+
+
+def rps_syncing():
     """
     This DAG handles syncing data to Gerald.
     """
     # Add modules to this list once complete (and pull, process, push methods implemented)
-    modules = ["UpdateEmployees"]
+    modules = ["PullFromRPS"]
     task_types = ["pull", "process", "push"]
 
     tasks = {}
@@ -43,7 +45,7 @@ def gerald_syncing():
                         mounts=[Mount(source="/home/geraldadmin/airflow/tmpdata", 
                                     target="/tmpdata", type="bind")]
                     )
+    tasks["PullFromRPS"]["pull"] >> tasks["PullFromRPS"]["process"] >> tasks["PullFromRPS"]["push"]                        
+    
 
-    tasks["PullFromRPS"]["pull"] >> tasks["PullFromRPS"]["process"] >> tasks["PullFromRPS"]["push"]
-
-gerald_syncing = gerald_syncing()
+rps_syncing = rps_syncing()

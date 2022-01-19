@@ -8,14 +8,16 @@ import sys
 import logging
 import argparse
 
+from gerald_syncing.PullFromAzure.sync import PullFromAzureFacade
 from gerald_syncing.PullFromRPS.sync import PullFromRPSFacade
 
 def main():
     
+    #For command line arguments
     description = """This program syncs data to/from Gerald and various external sources"""
     modules = ["PullFromABX", "PullFromACC", "PullFromAzure", "PullFromIRE", 
                 "PullFromRPS", "PullFromUBS", "PushToACC"]
-    tasks = ["pull", "process", "push"]
+    tasks = ["pull", "process", "push", "pushgerald", "pushgr"]
 
     # Init config/credentials
     logging.basicConfig(stream=sys.stdout, level=logging.INFO,
@@ -23,6 +25,7 @@ def main():
     rps_key = os.environ['rps_key']
     gerald_username = os.environ['gerald_username']
     gerald_password=  os.environ['gerald_password']
+
 
     # Parse command line arguments
     parser = argparse.ArgumentParser(description=description)
@@ -38,6 +41,16 @@ def main():
             c.process()
         elif args.task == "push":
             c.push()
+    if args.module == "PullFromAzure":
+        c = PullFromAzureFacade(gerald_username, gerald_password)
+        if args.task == "pull":
+            c.pull()
+        elif args.task == "process":
+            c.process()
+        elif args.task == "pushgerald":
+            c.push_gerald()
+        elif args.task == 'pushgr':
+            c.push_gr()
     else:
         print("Functionality not yet implemented")
 

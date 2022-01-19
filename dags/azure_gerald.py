@@ -7,10 +7,13 @@ from airflow.models import Variable
 from airflow.providers.docker.operators.docker import DockerOperator
 from docker.types import Mount
 
+h = BaseHook().get_connection('Gerald_Syncing')
 credentials = {
         "gerald_password": BaseHook().get_connection('gerald').get_password(),
         "gerald_username": "/dbs/gerald/colls/clients",
-        "rps_key" : Variable.get("rps_api_key")
+        "AZURE_TENANT_ID": h.extra_dejson['extra__azure__tenantId'],
+        "AZURE_CLIENT_SECRET": h.password,
+        "AZURE_CLIENT_ID": h.login
     }
 
 default_args = {
@@ -18,15 +21,17 @@ default_args = {
     'retry_delay': timedelta(minutes=2)
 }
 
-@dag(schedule_interval="0 0 * * *", start_date=datetime(2021, 12, 16), catchup=False, tags=['gerald'],
+@dag(schedule_interval="0 0 * */1 *", start_date=datetime(2021, 1, 20), catchup=False, tags=['gerald', 'azure'],
     max_active_runs=1, default_args=default_args)
-def gerald_syncing():
+
+
+def azure_syncing():
     """
     This DAG handles syncing data to Gerald.
     """
     # Add modules to this list once complete (and pull, process, push methods implemented)
-    modules = ["UpdateEmployees"]
-    task_types = ["pull", "process", "push"]
+    modules = ["PullFromAzure"]
+    task_types = ["pull", "process", "pushgerald", "pughgr"]
 
     tasks = {}
     for module in modules:
@@ -43,7 +48,7 @@ def gerald_syncing():
                         mounts=[Mount(source="/home/geraldadmin/airflow/tmpdata", 
                                     target="/tmpdata", type="bind")]
                     )
+    tasks["PullFromAzure"]["pull"] >> tasks["PullFromAzure"]["process"] >> tasks["PullFromAzure"]["pushgerald"] >> tasks["PullFromAzure"]['pushgr']                        
+    
 
-    tasks["PullFromRPS"]["pull"] >> tasks["PullFromRPS"]["process"] >> tasks["PullFromRPS"]["push"]
-
-gerald_syncing = gerald_syncing()
+gerald_syncing = azure_syncing()
