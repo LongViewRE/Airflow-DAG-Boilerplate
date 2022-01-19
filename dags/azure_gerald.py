@@ -1,4 +1,4 @@
-import json
+
 from datetime import datetime, timedelta
 
 from airflow.decorators import dag, task
@@ -15,7 +15,6 @@ credentials = {
         "AZURE_TENANT_ID": h.extra_dejson['extra__azure__tenantId'],
         "AZURE_CLIENT_SECRET": h.password,
         "AZURE_CLIENT_ID": h.login,
-        "rps_key" : Variable.get("rps_api_key"),
         "MSGraph_Client_ID": m.login,
         "MSGraph_Secret": m.password
     }

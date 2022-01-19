@@ -34,7 +34,11 @@ class PullFromRPSFacade():
     functions (pull, process, push). These functions will be sequentially 
     called as Airflow tasks.
     """
-    def __init__(self, rps_key, gerald_username, gerald_password) -> None:
+    def __init__(self) -> None:
+        rps_key = os.environ['rps_key']
+        gerald_username = os.environ['gerald_username']
+        gerald_password=  os.environ['gerald_password']
+        
         self.rps = RPSClient(rps_key)
         self.gerald = GremlinClient(gerald_username, gerald_password)
         self.property_client = PropertiesClient(gerald_username, gerald_password)

@@ -19,15 +19,8 @@ def main():
                 "PullFromRPS", "PullFromUBS", "PushToACC"]
     tasks = ["pull", "process", "push", "pushgerald", "pushgr"]
 
-    # Init config/credentials
     logging.basicConfig(stream=sys.stdout, level=logging.INFO,
             format="%(asctime)s - %(message)s", datefmt='%d-%b-%y %H:%M:%S')
-    rps_key = os.environ['rps_key']
-    gerald_username = os.environ['gerald_username']
-    gerald_password=  os.environ['gerald_password']
-    azure_username = os.environ['MSGraph_Client_ID']
-    azure_password = os.environ['MSGraph_Secret']
-
 
     # Parse command line arguments
     parser = argparse.ArgumentParser(description=description)
@@ -36,7 +29,7 @@ def main():
     args = parser.parse_args()
 
     if args.module == "PullFromRPS":
-        c = PullFromRPSFacade(rps_key, gerald_username, gerald_password)
+        c = PullFromRPSFacade()
         if args.task == "pull":
             c.pull()
         elif args.task == "process":
@@ -44,7 +37,7 @@ def main():
         elif args.task == "push":
             c.push()
     if args.module == "PullFromAzure":
-        c = PullFromAzureFacade(gerald_username, gerald_password, azure_username, azure_password)
+        c = PullFromAzureFacade()
         if args.task == "pull":
             c.pull()
         elif args.task == "process":
