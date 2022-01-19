@@ -13,7 +13,8 @@ credentials = {
         "gerald_username": "/dbs/gerald/colls/clients",
         "AZURE_TENANT_ID": h.extra_dejson['extra__azure__tenantId'],
         "AZURE_CLIENT_SECRET": h.password,
-        "AZURE_CLIENT_ID": h.login
+        "AZURE_CLIENT_ID": h.login,
+        "rps_key" : Variable.get("rps_api_key")
     }
 
 default_args = {
