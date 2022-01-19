@@ -33,7 +33,7 @@ class PullFromAzureFacade():
         Pulls information from Gerald and stores it in a tmp file
         """
 
-        gerald_emps = get_employees(self)
+        gerald_emps = get_employees()
 
         with open("/tmpdata/Employees_gerald.json", "w") as f:
             json.dump(gerald_emps, f, indent=4)
