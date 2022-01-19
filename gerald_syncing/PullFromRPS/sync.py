@@ -22,7 +22,7 @@ import partition, retrieve_properties, flatten, contact_comparison, \
 
 from gerald_syncing.PullFromRPS.gerald \
 import add_item, archive_item, add_contact, replace_edge, add_landlord, \
-    add_property, add_tenancy, submit_all
+    add_property, add_tenancy, submit_all, add_pm
 
 ###############################################################################
 # MAIN FUNCTION                                                               #
@@ -46,10 +46,10 @@ class PullFromRPSFacade():
         rps_props, gerald_props = retrieve_properties(self.rps, self.property_client)
 
         with open("/tmpdata/PullFromRPS_rps.json", "w") as f:
-            json.dump(rps_props, f)
+            json.dump(rps_props, f, indent=4)
         
         with open("/tmpdata/PullFromRPS_gerald.json", "w") as f:
-            json.dump(gerald_props, f)
+            json.dump(gerald_props, f, indent=4)
 
     def process(self):
         """
@@ -72,7 +72,7 @@ class PullFromRPSFacade():
         logging.info("Constructed all queries")
 
         with open("/tmpdata/PullFromRPS_queries.json", "w") as f:
-            json.dump(queries, f)
+            json.dump(queries, f, indent=4)
 
     def push(self):
         """
@@ -85,7 +85,6 @@ class PullFromRPSFacade():
             qstring = json.dumps(query, indent=4)
             try:
                 submit_all(self.gerald, query)
-                logging.info(f"Submitted queries for property {query['id']}: {qstring}")
             except Exception as e:
                 logging.error(f"Error submitting queries for {query['id']}: {qstring}", exc_info=True)
 
@@ -143,14 +142,17 @@ def compare_item(gerald, tuple):
     rps_property = t[0]
     rps_landlord = rps_property.pop('landlord', None)
     rps_tenancy = rps_property.pop('tenancy', None)
+    rps_pm = rps_property.pop('property_manager', None)
 
     gerald_property = t[1]
     gerald_landlord = gerald_property.pop('landlord', None)
     gerald_tenancy = gerald_property.pop('tenancy', None)
+    gerald_pm = gerald_property.pop('property_manager', None)
 
     prop_id = rps_property['id']
 
     queries.append(compare_property(gerald, rps_property, gerald_property))
+    queries.append(compare_pm(gerald, rps_pm, gerald_pm, prop_id))
     queries.append(compare_landlord(gerald, rps_landlord, gerald_landlord, prop_id))
     queries.append(compare_tenancy(gerald, rps_tenancy, gerald_tenancy, prop_id))
 
@@ -190,6 +192,26 @@ def compare_property(gerald, rps_prop, gerald_prop):
     if update_required:
         queries.append(add_property(gerald, rps_prop))
     
+    queries = reduce(flatten, queries, {"vertices": [], "edges": []})
+    return queries
+
+def compare_pm(gerald, rps_pm, gerald_pm, prop_id):
+    """
+    Compares the RPS and gerald info for property manager and outputs
+    a list of queries to sync the two (if both identical, returns 
+    empty list)
+    """
+    rps_email = rps_pm['email'].lower()
+    gerald_email = gerald_pm['email'].lower()
+
+    queries = []
+    
+    if rps_email == gerald_email:
+        return {"vertices": [], "edges": []}
+    else:
+        queries.append(add_pm(gerald, rps_pm, prop_id))
+        queries.append(replace_edge(prop_id, "manages", "previously managed", gerald_pm))
+
     queries = reduce(flatten, queries, {"vertices": [], "edges": []})
     return queries
 
@@ -314,7 +336,10 @@ def compare_contact(gerald, parent_id, tuple):
     # Check if any differences exist
     update_required = False
     for key,value in rps_contact.items():
-        if key not in gerald_contact.keys() or gerald_contact[key] != value:
+        if key in ["id", "system"]:
+            # skip the ID/system as it may be different for the same contact
+            continue
+        elif key not in gerald_contact.keys() or gerald_contact[key] != value:
             update_required = True
     
     # If they do, just call the add_property function, as it checks
