@@ -18,9 +18,9 @@ Class that pulls employees from Gerald, checks if all employees are accounted fo
 new nodes for employees that do not exist in Gerald
 """
 class PullFromAzureFacade():
-    def __init__(self, gerald_username, gerald_password, db_username, db_password) -> None:
+    def __init__(self, gerald_username, gerald_password, azure_username, azure_password) -> None:
         self.Gerald = GremlinClient(gerald_username, gerald_password)
-        self.AzureAD = MSGraphClient(db_username, db_password)
+        self.AzureAD = MSGraphClient(azure_username, azure_password)
         self.grcursor = connect_sql_app('GuaranteedRent')
     
     def pull(self):

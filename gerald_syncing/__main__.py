@@ -25,6 +25,8 @@ def main():
     rps_key = os.environ['rps_key']
     gerald_username = os.environ['gerald_username']
     gerald_password=  os.environ['gerald_password']
+    azure_username = os.environ['MSGraph_Client_ID']
+    azure_password = os.environ['MSGraph_Secret']
 
 
     # Parse command line arguments
@@ -42,7 +44,7 @@ def main():
         elif args.task == "push":
             c.push()
     if args.module == "PullFromAzure":
-        c = PullFromAzureFacade(gerald_username, gerald_password)
+        c = PullFromAzureFacade(gerald_username, gerald_password, azure_username, azure_password)
         if args.task == "pull":
             c.pull()
         elif args.task == "process":

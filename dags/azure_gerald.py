@@ -8,13 +8,16 @@ from airflow.providers.docker.operators.docker import DockerOperator
 from docker.types import Mount
 
 h = BaseHook().get_connection('Gerald_Syncing')
+m = BaseHook().get_connection('MS_Graph')
 credentials = {
         "gerald_password": BaseHook().get_connection('gerald').get_password(),
         "gerald_username": "/dbs/gerald/colls/clients",
         "AZURE_TENANT_ID": h.extra_dejson['extra__azure__tenantId'],
         "AZURE_CLIENT_SECRET": h.password,
         "AZURE_CLIENT_ID": h.login,
-        "rps_key" : Variable.get("rps_api_key")
+        "rps_key" : Variable.get("rps_api_key"),
+        "MSGraph_Client_ID": m.login,
+        "MSGraph_Secret": m.password
     }
 
 default_args = {
