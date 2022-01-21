@@ -57,7 +57,7 @@ def sql_create_employees(db_client, emps_to_create, database) -> None:
     if database == 'gr':
 
         for emp in emps_to_create:
-                db_client.execute(f"INSERT INTO TABLE employees VALUES ('{emp['id']}', '{emp['firstName']}', '{emp['lastName']}', '{emp['email']}')")
+                db_client.execute(f"INSERT INTO TABLE employees VALUES ('{emp['id']}', '{emp['firstname']}', '{emp['lastname']}', '{emp['mail']}')")
     
     elif database == 'appraisals':
 
