@@ -86,10 +86,11 @@ class PullFromAzureFacade():
             qstring = json.dumps(query, indent=4)
             try:
                 self.Gerald.submit(query)
-                logging.info(f"Submitted queries for property {query['id']}: {qstring}")
+                # logging.info(f"Submitted queries for property {query['id']}: {qstring}")
+                logging.info(f"Submitted queries for property {query[0]}: {qstring}")
             except Exception as e:
-                logging.error(f"Error submitting queries for {query['id']}: {qstring}", exc_info=True)
-
+                #logging.error(f"Error submitting queries for {query['id']}: {qstring}", exc_info=True)
+                logging.error(f"Error submitting queries for {query[0]}: {qstring}", exc_info=True)
         logging.info("Submitted all queries")
 
     def push_gr(self):
