@@ -33,7 +33,7 @@ def missing_sql_employees(azure_emps, gr_emps = [], appr_emps = [], database = '
         for emp in azure_emps:
             exists = False
             for gr_emp in gr_emps:
-                if(emp['email'] == gr_emp['email']):
+                if(emp['mail'] == gr_emp['email']):
                     exists = True
             if exists == False:
                 emps_to_create.append(emp)
