@@ -68,7 +68,7 @@ class PullFromAzureFacade():
         with open("/tmpdata/Employees_gr.json", "r") as f:
             gr_emps = json.load(f)
         
-        gr_missing = missing_sql_employees(gr_emps, gerald_emps, database='gr')
+        gr_missing = missing_sql_employees(gerald_emps, gr_emps, database='gr')
 
         with open("/tmpdata/Employees_grmissing.json", "w") as f:
             json.dump(gr_missing, f, indent=4)
@@ -86,10 +86,11 @@ class PullFromAzureFacade():
             qstring = json.dumps(query, indent=4)
             try:
                 self.Gerald.submit(query)
-                logging.info(f"Submitted queries for property {query['id']}: {qstring}")
+                # logging.info(f"Submitted queries for property {query['id']}: {qstring}")
+                logging.info(f"Submitted queries for property {query[0]}: {qstring}")
             except Exception as e:
-                logging.error(f"Error submitting queries for {query['id']}: {qstring}", exc_info=True)
-
+                #logging.error(f"Error submitting queries for {query['id']}: {qstring}", exc_info=True)
+                logging.error(f"Error submitting queries for {query[0]}: {qstring}", exc_info=True)
         logging.info("Submitted all queries")
 
     def push_gr(self):

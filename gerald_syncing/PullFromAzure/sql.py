@@ -38,7 +38,6 @@ def missing_sql_employees(azure_emps, gr_emps = [], appr_emps = [], database = '
             if exists == False:
                 emps_to_create.append(emp)
 
-
     elif database == 'appraisals':
 
         for emp in azure_emps:
@@ -57,10 +56,10 @@ def sql_create_employees(db_client, emps_to_create, database) -> None:
     if database == 'gr':
 
         for emp in emps_to_create:
-                db_client.execute(f"INSERT INTO TABLE employees (employeeID, firstName, lastName, emailID) VALUES ('{emp['id']}', '{emp['firstName']}', '{emp['lastName']}', '{emp['email']}')")
-    
+                # db_client.execute(f"INSERT INTO employees ('employeeID', 'firstName', 'lastName', 'emailID') VALUES ('{emp['id']}', '{emp['givenName']}', '{emp['surname']}', '{emp['mail']}')")
+                db_client.execute(f"INSERT INTO employees (employeeID, firstName, lastName, emailID) VALUES ('{emp['id']}', '{emp['givenName']}', '{emp['surname']}', '{emp['mail']}')")
     elif database == 'appraisals':
 
         for emp in emps_to_create:
-                db_client.execute(f"INSERT INTO TABLE employees VALUES ('{emp['id']}', '{emp['firstName']}', '{emp['lastName']}', '{emp['email']}')")
+                db_client.execute(f"INSERT INTO employees VALUES ('{emp['id']}', '{emp['firstName']}', '{emp['lastName']}', '{emp['email']}')")
     
