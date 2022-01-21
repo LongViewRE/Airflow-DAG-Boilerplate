@@ -55,7 +55,7 @@ class PullFromAzureFacade():
         """
 
         # Gerald Related Processing
-        with open("/tmpdata/Employees_gerald.json", "r") as f:
+        with open("/tmpdata/Employees_azure.json", "r") as f:
             gerald_emps = json.load(f)
 
         queries = format_queries(self.Gerald, gerald_emps)
