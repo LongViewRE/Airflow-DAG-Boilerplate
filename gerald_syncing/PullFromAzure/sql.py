@@ -1,3 +1,6 @@
+from isodate import D_ALT_BAS_ORD
+
+
 def get_sql_employees(db_client, database):
     '''
     Function to retrieve sql employees. 
@@ -58,6 +61,9 @@ def sql_create_employees(db_client, emps_to_create, database) -> None:
         for emp in emps_to_create:
                 # db_client.execute(f"INSERT INTO employees ('employeeID', 'firstName', 'lastName', 'emailID') VALUES ('{emp['id']}', '{emp['givenName']}', '{emp['surname']}', '{emp['mail']}')")
                 db_client.execute(f"INSERT INTO employees (employeeID, firstName, lastName, emailID) VALUES ('{emp['id']}', '{emp['givenName']}', '{emp['surname']}', '{emp['mail']}')")
+
+        db_client.commit()
+        
     elif database == 'appraisals':
 
         for emp in emps_to_create:
