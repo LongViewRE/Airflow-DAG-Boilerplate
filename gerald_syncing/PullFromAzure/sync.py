@@ -68,7 +68,7 @@ class PullFromAzureFacade():
         with open("/tmpdata/Employees_gr.json", "r") as f:
             gr_emps = json.load(f)
         
-        gr_missing = missing_sql_employees(gr_emps, gerald_emps, database='gr')
+        gr_missing = missing_sql_employees(gerald_emps, gr_emps, database='gr')
 
         with open("/tmpdata/Employees_grmissing.json", "w") as f:
             json.dump(gr_missing, f, indent=4)
