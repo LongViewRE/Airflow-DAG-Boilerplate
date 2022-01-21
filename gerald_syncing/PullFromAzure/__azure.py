@@ -11,6 +11,8 @@ def get_azure_employees(azure_client):
 
 
         for key in i:
+            if key == 'id':
+                i[key] = 'emp-' + i[key]
             if i[key] is None:
                 i[key] = ''
             if "'" in i[key]:

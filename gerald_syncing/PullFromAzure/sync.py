@@ -9,7 +9,7 @@ from LV_db_connection import GremlinClient
 from LV_db_connection import connect_sql_app
 from LV_external_services import MSGraphClient
 
-from gerald_syncing.PullFromAzure.azure import get_azure_employees
+from gerald_syncing.PullFromAzure.__azure import get_azure_employees
 from gerald_syncing.PullFromAzure.gerald import format_queries
 from gerald_syncing.PullFromAzure.sql import get_sql_employees, missing_sql_employees, sql_create_employees
 

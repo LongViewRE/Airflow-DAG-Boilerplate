@@ -9,9 +9,6 @@ def get_sql_employees(db_client, database):
     if database == 'gr':
         tmp_emps = db_client.execute('SELECT employeeID, firstName, lastName, emailID FROM employees')
     
-    elif database == 'appraisals':
-        tmp_emps = db_client.execute('SELECT employeeID, firstName, lastName, emailID FROM employees')
-    
     #formatting data outputs
     for emp in tmp_emps:
         data = {
@@ -34,9 +31,12 @@ def missing_sql_employees(azure_emps, gr_emps = [], appr_emps = [], database = '
     if database == 'gr':
 
         for emp in azure_emps:
+            exists = False
             for gr_emp in gr_emps:
                 if(emp['email'] == gr_emp['email']):
-                    emps_to_create.append(emp)
+                    exists = True
+            if exists == False:
+                emps_to_create.append(emp)
 
 
     elif database == 'appraisals':
@@ -57,7 +57,7 @@ def sql_create_employees(db_client, emps_to_create, database) -> None:
     if database == 'gr':
 
         for emp in emps_to_create:
-                db_client.execute(f"INSERT INTO TABLE employees VALUES ('{emp['id']}', '{emp['firstName']}', '{emp['lastName']}', '{emp['email']}')")
+                db_client.execute(f"INSERT INTO TABLE employees (employeeID, firstName, lastName, emailID) VALUES ('{emp['id']}', '{emp['firstName']}', '{emp['lastName']}', '{emp['email']}')")
     
     elif database == 'appraisals':
 
