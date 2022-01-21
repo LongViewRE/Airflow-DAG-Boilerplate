@@ -17,14 +17,14 @@ def get_azure_employees(azure_client):
                 i[key] = i[key].replace("'", "")
             
             # active status is decided by if employee has an assigned licenses - 0 licenses = not active 
-            if (len(i['assignedLicenses']) == 0):
-                i['active'] = False
-            else:
-                i['active'] = True
+        if (len(i['assignedLicenses']) == 0):
+            i['active'] = False
+        else:
+            i['active'] = True
 
             
-            #add only internal employees to table not external parties.
-            if 'longview.com.au' in i['mail']:
-                employees.append(i)
+        #add only internal employees to table not external parties.
+        if 'longview.com.au' in i['mail']:
+            employees.append(i)
             
     return employees
