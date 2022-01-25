@@ -17,7 +17,7 @@ def main():
     description = """This program syncs data to/from Gerald and various external sources"""
     modules = ["PullFromABX", "PullFromACC", "PullFromAzure", "PullFromIRE", 
                 "PullFromRPS", "PullFromUBS", "PushToACC"]
-    tasks = ["pull", "process", "push", "pushgerald", "pushgr"]
+    tasks = ["pull", "process", "push", "pushgerald", "pushgr", "pushappr"]
 
     logging.basicConfig(stream=sys.stdout, level=logging.INFO,
             format="%(asctime)s - %(message)s", datefmt='%d-%b-%y %H:%M:%S')
@@ -46,6 +46,8 @@ def main():
             c.push_gerald()
         elif args.task == 'pushgr':
             c.push_gr()
+        elif args.task == 'pushappr':
+            c.push_appr()
     else:
         print("Functionality not yet implemented")
 
