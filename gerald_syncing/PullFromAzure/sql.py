@@ -12,6 +12,9 @@ def get_sql_employees(db_client, database):
     if database == 'gr':
         tmp_emps = db_client.execute('SELECT employeeID, firstName, lastName, emailID FROM employees')
     
+    if database == 'appraisals':
+          tmp_emps = db_client.execute('SELECT employeeID, firstName, lastName, emailID FROM employees')
+    
     #formatting data outputs
     for emp in tmp_emps:
         data = {

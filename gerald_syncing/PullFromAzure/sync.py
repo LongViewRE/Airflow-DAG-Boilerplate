@@ -48,7 +48,7 @@ class PullFromAzureFacade():
             json.dump(gr_emps, f, indent=4)
 
         #Employees from the Appraisals database
-        appr_emps = get_sql_employees(self.apprcursor, 'gr')
+        appr_emps = get_sql_employees(self.apprcursor, 'appraisals')
         with open("/tmpdata/Employees_appr.json", "w") as f:
             json.dump(appr_emps, f, indent=4)
 
@@ -122,7 +122,7 @@ class PullFromAzureFacade():
 
     def push_appr(self):
             """
-            Executes queries on the GR Database
+            Executes queries on the Appraisals Database
             """
 
             with open("/tmpdata/Employees_apprmissing.json", "r") as f:
