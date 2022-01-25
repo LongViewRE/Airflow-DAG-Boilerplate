@@ -34,7 +34,7 @@ def azure_syncing():
     """
     # Add modules to this list once complete (and pull, process, push methods implemented)
     modules = ["PullFromAzure"]
-    task_types = ["pull", "process", "pushgerald", "pushgr"]
+    task_types = ["pull", "process", "pushgerald", "pushgr", "pushappr"]
 
     tasks = {}
     for module in modules:
@@ -51,7 +51,7 @@ def azure_syncing():
                         mounts=[Mount(source="/home/geraldadmin/airflow/tmpdata", 
                                     target="/tmpdata", type="bind")]
                     )
-    tasks["PullFromAzure"]["pull"] >> tasks["PullFromAzure"]["process"] >> tasks["PullFromAzure"]["pushgerald"] >> tasks["PullFromAzure"]['pushgr']                        
+    tasks["PullFromAzure"]["pull"] >> tasks["PullFromAzure"]["process"] >> tasks["PullFromAzure"]["pushgerald"] >> tasks["PullFromAzure"]['pushgr']  >> tasks["PullFromAzure"]["pushappr"]                      
     
 
 gerald_syncing = azure_syncing()

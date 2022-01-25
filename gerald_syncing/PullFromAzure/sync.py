@@ -28,7 +28,7 @@ class PullFromAzureFacade():
         self.Gerald = GremlinClient(gerald_username, gerald_password)
         self.AzureAD = MSGraphClient(azure_username, azure_password)
         self.grcursor = connect_sql_app('GuaranteedRent')
-        self.apprcursor = connect_sql_app('ArtemisDB')
+        self.apprcursor = connect_sql_app('appraisals')
 
     def pull(self):
         """
@@ -46,6 +46,11 @@ class PullFromAzureFacade():
         gr_emps = get_sql_employees(self.grcursor, 'gr')
         with open("/tmpdata/Employees_gr.json", "w") as f:
             json.dump(gr_emps, f, indent=4)
+
+        #Employees from the Appraisals database
+        appr_emps = get_sql_employees(self.apprcursor, 'gr')
+        with open("/tmpdata/Employees_appr.json", "w") as f:
+            json.dump(appr_emps, f, indent=4)
 
 
 
@@ -72,6 +77,15 @@ class PullFromAzureFacade():
 
         with open("/tmpdata/Employees_grmissing.json", "w") as f:
             json.dump(gr_missing, f, indent=4)
+
+        # Appraisals Related Processing
+        with open("/tmpdata/Employees_appr.json", "r") as f:
+            appr_emps = json.load(f)
+        
+        appr_missing = missing_sql_employees(gerald_emps, appr_emps, database='appraisals')
+
+        with open("/tmpdata/Employees_apprmissing.json", "w") as f:
+            json.dump(appr_missing, f, indent=4)        
 
 
     def push_gerald(self):
@@ -102,5 +116,18 @@ class PullFromAzureFacade():
                 gr_missing = json.load(f)
 
             sql_create_employees(self.grcursor, gr_missing, database='gr')
+
+            logging.info("Submitted all queries")
+
+
+    def push_appr(self):
+            """
+            Executes queries on the GR Database
+            """
+
+            with open("/tmpdata/Employees_apprmissing.json", "r") as f:
+                appr_missing = json.load(f)
+
+            sql_create_employees(self.apprcursor, appr_missing, database='appraisals')
 
             logging.info("Submitted all queries")
