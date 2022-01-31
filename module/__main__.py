@@ -8,8 +8,8 @@ import sys
 import logging
 import argparse
 
-from gerald_syncing.PullFromAzure.sync import PullFromAzureFacade
-from gerald_syncing.PullFromRPS.sync import PullFromRPSFacade
+from module.PullFromAzure.sync import PullFromAzureFacade
+from module.PullFromRPS.sync import PullFromRPSFacade
 
 def main():
     
