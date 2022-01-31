@@ -1,3 +1,4 @@
+from telnetlib import EXOPL
 from isodate import D_ALT_BAS_ORD
 
 
@@ -13,7 +14,7 @@ def get_sql_employees(db_client, database):
         tmp_emps = db_client.execute('SELECT employeeID, firstName, lastName, emailID FROM employees')
     
     if database == 'appraisals':
-          tmp_emps = db_client.execute('SELECT employeeID, firstName, lastName, emailID FROM employees')
+        tmp_emps = db_client.execute('SELECT employeeID, firstName, lastName, emailID FROM employees')
     
     #formatting data outputs
     for emp in tmp_emps:
@@ -47,8 +48,11 @@ def missing_sql_employees(azure_emps, gr_emps = [], appr_emps = [], database = '
     elif database == 'appraisals':
 
         for emp in azure_emps:
+            exists = False
             for appr_emp in appr_emps:
                 if(emp['id'] == appr_emp['id']):
+                    exists = True
+            if exists == False:
                     emps_to_create.append(emp)
 
     return emps_to_create
