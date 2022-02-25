@@ -8,21 +8,16 @@ import sys
 import logging
 import argparse
 
-from module.PullFromAzure.sync import PullFromAzureFacade
-from module.PullFromRPS.sync import PullFromRPSFacade
+from ACC_Syncing.ACC_Syncing.sync import PullFromAzureFacade
+
 
 def main():
     
     #For command line arguments
     description = """This program syncs data to/from Gerald and various external sources"""
-
-    ###### CHANGE
-    # Change these modules to include your submodule. 
-    modules = ["Submodule"]
-
-    ##### CHANGE
-    # Change these tasks to the methods you define in your submodule class defined in submodule/sync.py
-    tasks = ["pull", "process", "push"]
+    modules = ["PullFromABX", "PullFromACC", "PullFromAzure", "PullFromIRE", 
+                "PullFromRPS", "PullFromUBS", "PushToACC"]
+    tasks = ["pull", "process", "push", "pushgerald", "pushgr", "pushappr"]
 
     logging.basicConfig(stream=sys.stdout, level=logging.INFO,
             format="%(asctime)s - %(message)s", datefmt='%d-%b-%y %H:%M:%S')
@@ -33,23 +28,26 @@ def main():
     parser.add_argument('task', choices=tasks, help="the task to execute")
     args = parser.parse_args()
 
-    #### CHANGE
-    # Adjust the module and tasks to what you define in submodule and tasks from the class.
-    if args.module == "Submodule":
-
-        #### CHANGE
-        # Change the class to what you define in the submodule. 
+    if args.module == "PullFromRPS":
         c = PullFromRPSFacade()
-
-        #### CHANGE
-        # Adjust tasks and methods to what you define in your submodule.
         if args.task == "pull":
             c.pull()
         elif args.task == "process":
             c.process()
         elif args.task == "push":
             c.push()
-
+    if args.module == "PullFromAzure":
+        c = PullFromAzureFacade()
+        if args.task == "pull":
+            c.pull()
+        elif args.task == "process":
+            c.process()
+        elif args.task == "pushgerald":
+            c.push_gerald()
+        elif args.task == 'pushgr':
+            c.push_gr()
+        elif args.task == 'pushappr':
+            c.push_appr()
     else:
         print("Functionality not yet implemented")
 

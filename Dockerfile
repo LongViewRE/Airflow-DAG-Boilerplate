@@ -1,4 +1,4 @@
-# syntax=docker/dockerfile:1
+#syntax=docker/dockerfile:1
 
 FROM python:3.8-slim-buster
 RUN apt-get update && apt-get install -y git openssh-client g++ unixodbc-dev curl gnupg
@@ -11,4 +11,6 @@ COPY requirements.txt requirements.txt
 RUN --mount=type=ssh pip3 install -r requirements.txt
 COPY . .
 
+#### CHANGE
+# Adjust this entrypoint to "module"
 ENTRYPOINT ["python3", "-m", "gerald_syncing"]

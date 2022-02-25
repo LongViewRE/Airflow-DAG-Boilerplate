@@ -1,6 +1,8 @@
 
 python-dotenv
 thefuzz[speedup]
-git+ssh://git@github.com/LongViewRE/LV_db_connection
-git+ssh://git@github.com/LongViewRE/LV_external_services
-git+ssh://git@github.com/LongViewRE/LV_general_functions
+
+# Add any dependancy packages. If you need a private LongView package use the following format to utilize 
+# private packages. 
+#
+# git+ssh://git@github.com/LongViewRE/LV_db_connection
