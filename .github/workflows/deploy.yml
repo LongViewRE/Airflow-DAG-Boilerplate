@@ -1,0 +1,20 @@
+name: Updating Dags Folder on Airflow
+on: [push]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: 
+        uses: fifsky/ssh-action@master
+        with: 
+          command: | 
+            cd /home/geraldadmin/airflow/dags 
+            git pull
+            git submodule sync --recursive
+            git submodule update --init
+            git submodule foreach git pull origin main
+          
+          host: ${{ secrets.HOST }}
+          user: ${{ secrets.USERNAME }}
+          key: ${{ secrets.KEY }}

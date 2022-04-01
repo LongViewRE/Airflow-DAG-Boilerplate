@@ -13,4 +13,4 @@ COPY . .
 
 #### CHANGE
 # Adjust this entrypoint to "module"
-ENTRYPOINT ["python3", "-m", "gerald_syncing"]
+ENTRYPOINT ["python3", "-m", "module"]
