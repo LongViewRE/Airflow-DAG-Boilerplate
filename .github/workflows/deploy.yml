@@ -5,11 +5,11 @@ jobs:
   build:
     runs-on: ubuntu-latest
     steps:
-      - name: 
+      - name: Update Repository
         uses: fifsky/ssh-action@master
         with: 
           command: | 
-            cd /home/geraldadmin/airflow/dags 
+            cd #Change to dags directory of your airflow server
             git pull
             git submodule sync --recursive
             git submodule update --init
