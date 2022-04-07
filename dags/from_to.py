@@ -10,16 +10,7 @@ from docker.types import Mount
 
 ####CHANGE
 # Use credentials to set environment variables according to Airflow documentation.
-h = BaseHook().get_connection('Gerald_Syncing')
-m = BaseHook().get_connection('MS_Graph')
 credentials = {
-        "gerald_password": BaseHook().get_connection('gerald').get_password(),
-        "gerald_username": "/dbs/gerald/colls/clients",
-        "AZURE_TENANT_ID": h.extra_dejson['extra__azure__tenantId'],
-        "AZURE_CLIENT_SECRET": h.password,
-        "AZURE_CLIENT_ID": h.login,
-        "MSGraph_Client_ID": m.login,
-        "MSGraph_Secret": m.password
     }
 
 default_args = {
@@ -53,18 +44,19 @@ def submodule():
                     DockerOperator(
                         #### CHANGE
                         # Adjust image to the repository in LVDocker. 
-                        image="lvdocker.azurecr.io/gerald-syncing:latest", 
+                        image="", 
                         task_id=f'{module}_{task_type}',
                         command=f'{module} {task_type}',
                         private_environment=credentials,
                         tty=True,
                         force_pull=True,
-                        mounts=[Mount(source="/home/geraldadmin/airflow/tmpdata", 
+                        ### CHANGE
+                        # Adjust mount source to the correct directory
+                        mounts=[Mount(source="", 
                                     target="/tmpdata", type="bind")]
                     )
     #### CHANGE
-    # Adjust the tasks as they should be run. Use the following format tasks['submodule']['task1'] >> tasks['submodule']['task2'] 
-    tasks["PullFromAzure"]["pull"] >> tasks["PullFromAzure"]["process"] >> tasks["PullFromAzure"]["pushgerald"] >> tasks["PullFromAzure"]['pushgr']  >> tasks["PullFromAzure"]["pushappr"]                      
+    # Adjust the tasks as they should be run. Use the following format tasks['submodule']['task1'] >> tasks['submodule']['task2']                    
     
 
 #### CHANGE
