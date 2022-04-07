@@ -1,23 +1,35 @@
 # Airflow DAG Boilerplate 
 
-This repository represents a boilerplate package for writing DAGs at LongView. 
+This repository represents a boilerplate package for writing DAGs that are deployed using the Docker Operator. 
 
-For more information follow this link her for the [documentation](https://longviewre.atlassian.net/wiki/spaces/TD/pages/917540/Writing+and+Deploying+a+DAG)
+The package is structured in the following way: 
 
-## Getting Set Up
+```
+.github
+  -workflows
+    -deploy.yml
+dags
+  -__init__.py
+  -dag.py
+module
+  -submodule
+    -__init__.py
+    -sync.py
+  -__init__.py
+  -__main__.py
+Dockerfile
+dockerpush.sh
+requirements.txt
+```
 
-The best practice for using this code is to create a new project folder named specifically for the function the DAG will be performing. 
+We have delimited elements of each page with the following characters to indicate they need to be updated:
 
-ex. TA_Reporting (A DAG repository for data orchestration regarding TA Reporting)
+```python
 
-Then in Github create a new repository that corresponds to that project folder. 
-
-Then pull this respository 
-
-```bash
-
-git pull https://github.com/LongViewRE/airflow_dags.git
+#### CHANGE
+#
 
 ```
 
-This will pull the directory and its contents but any modifications you make will be pushed to the project's repository not this one. 
+
+
