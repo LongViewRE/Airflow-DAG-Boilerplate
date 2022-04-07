@@ -15,13 +15,13 @@ ssh-add ~/.ssh/id_ed25519
 docker build --ssh default --tag $1 .
 
 # Tag image with both version no and latest tag
-docker tag $1:latest lvdocker.azurecr.io/$1:$2
-docker tag $1:latest lvdocker.azurecr.io/$1:latest
+docker tag $1:latest container_uri/$1:$2
+docker tag $1:latest container_uri/$1:latest
 
-# Authenticate to lvdocker registry
+# Authenticate to Azure Containter Registry
 az login
-az acr login --name lvdocker
+az acr login --name container_name
 
 # Push both images
-docker push lvdocker.azurecr.io/$1:$2
-docker push lvdocker.azurecr.io/$1:latest
+docker push container_uri/$1:$2
+docker push container_uri/$1:latest
