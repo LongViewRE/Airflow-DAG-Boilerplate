@@ -1,8 +1,4 @@
+#### CHANGE
+# Add any dependancy packages below. 
 
-python-dotenv
-thefuzz[speedup]
 
-# Add any dependancy packages. If you need a private LongView package use the following format to utilize 
-# private packages. 
-#
-# git+ssh://git@github.com/LongViewRE/LV_db_connection
