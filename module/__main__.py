@@ -8,13 +8,14 @@ import sys
 import logging
 import argparse
 
-from module.PullFromAzure.sync import PullFromAzureFacade
-from module.PullFromRPS.sync import PullFromRPSFacade
+##### CHANGE
+# Import the class from the module you've written. Airflow prefers absolute imports.
+from module.submodule.sync import Class
 
 def main():
     
     #For command line arguments
-    description = """This program syncs data to/from Gerald and various external sources"""
+    description = ""
 
     ###### CHANGE
     # Change these modules to include your submodule. 
@@ -39,7 +40,7 @@ def main():
 
         #### CHANGE
         # Change the class to what you define in the submodule. 
-        c = PullFromRPSFacade()
+        c = Class()
 
         #### CHANGE
         # Adjust tasks and methods to what you define in your submodule.
