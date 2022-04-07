@@ -10,7 +10,7 @@ import argparse
 
 ##### CHANGE
 # Import the class from the module you've written. Airflow prefers absolute imports.
-from module.submodule.sync import Class
+from module.submodule.sync import SubmoduleFacade
 
 def main():
     
@@ -40,7 +40,7 @@ def main():
 
         #### CHANGE
         # Change the class to what you define in the submodule. 
-        c = Class()
+        c = SubmoduleFacade()
 
         #### CHANGE
         # Adjust tasks and methods to what you define in your submodule.
